@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>Genome Collector API Reference</title>
+    
+      <link rel="stylesheet" href="_static/pygments.css">
+      <link rel="stylesheet" href="_static/theme.css">
+      <link rel="stylesheet" href="_static/sphinx_press_theme.css">
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+
+      
+      <script src="_static/theme-vendors.js"></script>
+      <script src="_static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="prev" title="Genome Collector" href="index.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="index.html" class="home-link">
+    
+      <span class="site-name">Genome Collector</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="index.html#more-biology-software">Reference</a></span>
+      </p>
+      <ul class="current">
+        
+          <li class="toctree-l1 current"><a href="#" class="reference internal current">Genome Collector API Reference</a>
+
+            
+              <ul>
+                
+                  <li class="toctree-l2"><a href="#genome-collector-api-reference" class="reference internal">Genome Collector API Reference</a></li>
+                
+              </ul>
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    
+    <li>Genome Collector API Reference</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+  <li class="prev">
+    <a href="index.html"
+       title="previous chapter">← Genome Collector</a>
+  </li>
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <div class="section" id="genome-collector-api-reference">
+<h1>Genome Collector API Reference<a class="headerlink" href="#genome-collector-api-reference" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="genome_collector.GenomeCollection">
+<em class="property">class </em><code class="sig-prename descclassname">genome_collector.</code><code class="sig-name descname">GenomeCollection</code><span class="sig-paren">(</span><em class="sig-param">data_dir='default'</em>, <em class="sig-param">logger='bar'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of local data files including genomes and BLAST databases.</p>
+<p>To prevent the collection from downloading
+<code class="docutils literal notranslate"><span class="pre">GenomeCollection.autodownload</span> <span class="pre">=</span> <span class="pre">False</span></code></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_dir</strong></p>
+<blockquote>
+<div><p>Path to the directory where all genomes informations, sequences and
+blast database will be kept. The default value “local_default” means
+that the system-specific user data directory will be used, so either
+<code class="docutils literal notranslate"><span class="pre">~/.local/share/genome_collector</span></code> on Linux, or
+<code class="docutils literal notranslate"><span class="pre">~/Library/Application</span> <span class="pre">Support/genome_collector</span></code> on MacOS, etc.</p>
+</div></blockquote>
+<p><strong>logger</strong></p>
+<blockquote>
+<div><p>Logger to which the messages will be sent when downloading files or
+building blast databases. Use “bar” for a default bar logger, None
+for no logging, or any Proglog logger.</p>
+</div></blockquote>
+</dd>
+</dl>
+<p class="rubric">Attributes</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 94%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>autodownload</strong></p></td>
+<td><p>When an absent local data file is requested and <code class="docutils literal notranslate"><span class="pre">autodownload</span></code> is True, the file will be automatically downloaded over the Internet. Otherwise a FileNotFoundError is raised. Attribute <code class="docutils literal notranslate"><span class="pre">autodownload</span></code> can be set to False on a single <code class="docutils literal notranslate"><span class="pre">collection</span></code> instance, or at class level with <code class="docutils literal notranslate"><span class="pre">GenomeCollection.autodownload</span> <span class="pre">=</span> <span class="pre">False</span></code> to globally prevent Genome Collector from downloadind data files.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>default_dir</strong></p></td>
+<td><p>Default directory to use when parameter data_dir=’default’. This attribute allows to set a global default_dir at the beginning of a script with <code class="docutils literal notranslate"><span class="pre">GlobalCollection.default_dir</span> <span class="pre">=</span> <span class="pre">'/my/new/dir/'</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>messages_prefix</strong></p></td>
+<td><p>Prefix appearing as “[prefix] ” in all logging messages.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>datafiles_extensions</strong></p></td>
+<td><p>Dictionnary linking data file types to standardized file extensions.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.blast_against_taxid">
+<code class="sig-name descname">blast_against_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">db_type</em>, <em class="sig-param">blast_args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.blast_against_taxid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.blast_against_taxid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a BLAST, using a genome_collector database.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>taxid</strong></p>
+<blockquote>
+<div><p>TaxID (int or str) of the reference genome against which the query
+will be blaster. If no database for this taxID is available locally
+it will be downloaded.</p>
+</div></blockquote>
+<p><strong>db_type</strong></p>
+<blockquote>
+<div><p>Either “nucl” (nucleotides database for blastn, blastx) or “prot”
+(protein database, untested).</p>
+</div></blockquote>
+<p><strong>blast_args</strong></p>
+<blockquote>
+<div><p>List of NCBI-BLAST arguments, for instance [‘blastn’, ‘-query’,
+‘my_sequences.fa’, ‘-out’, ‘myresults.xml’].</p>
+</div></blockquote>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">blast_against_taxid</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">db_type</span><span class="p">,</span> <span class="n">blast_args</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.datafile_path">
+<code class="sig-name descname">datafile_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.datafile_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.datafile_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a standardized datafile path for the given TaxID.</p>
+<p>Unlike get methods such as <code class="docutils literal notranslate"><span class="pre">self.get_taxid_genome_path()</span></code>, this
+method only returns the path, and does not check whether the files
+exist locally or not.</p>
+<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genome_fasta, blast_nucl,
+blast_prot, genome_gz, infos.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi">
+<code class="sig-name descname">download_taxid_genome_infos_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.download_taxid_genome_infos_from_ncbi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download infos on the TaxID and store them in ‘[taxid].yaml’.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.generate_blast_db_for_taxid">
+<code class="sig-name descname">generate_blast_db_for_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">db_type='nucl'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.generate_blast_db_for_taxid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.generate_blast_db_for_taxid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a Blast DB for the TaxID. Autodownload FASTA if needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">db_type</span></code> is either “nucl” (nucleotides database for blastn, blastx)
+or “prot” (protein database, untested).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.get_taxid_blastdb_path">
+<code class="sig-name descname">get_taxid_blastdb_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">db_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_blastdb_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_blastdb_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the path to a local blast DB, download and create one if needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">db_type</span></code> is either “nucl” (nucleotides database for blastn, blastx)
+or “prot” (protein database, untested).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.get_taxid_genome_path">
+<code class="sig-name descname">get_taxid_genome_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_genome_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_genome_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a path to the taxid’s genome sequence. Download if needed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.get_taxid_infos">
+<code class="sig-name descname">get_taxid_infos</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_infos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dict with data about the taxid.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collection</span><span class="o">.</span><span class="n">get_taxid_infos</span><span class="p">(</span><span class="mi">511145</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span>
+<span class="gp">&gt;&gt;&gt; </span>     <span class="s1">&#39;Organism Name&#39;</span><span class="p">:</span> <span class="s1">&#39;Escherischia Coli&#39;</span><span class="p">,</span> 
+<span class="gp">&gt;&gt;&gt; </span>     <span class="s1">&#39;DefLine&#39;</span><span class="p">:</span> <span class="s1">&#39;A well-studied enteric bacterium&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>     <span class="s1">&#39;Organism_Kingdom&#39;</span><span class="p">:</span> <span class="s1">&#39;Bacteria&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>     <span class="s1">&#39;AssemblyID&#39;</span><span class="p">:</span> <span class="s1">&#39;1755381&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>     <span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.list_locally_available_taxids">
+<code class="sig-name descname">list_locally_available_taxids</code><span class="sig-paren">(</span><em class="sig-param">data_type='infos'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.list_locally_available_taxids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.list_locally_available_taxids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all taxIDs for which there is a local data file of this type.</p>
+<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genome_fasta, blast_nucl,
+blast_prot, genome_gz, infos.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.remove_all_local_data_files">
+<code class="sig-name descname">remove_all_local_data_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.remove_all_local_data_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.remove_all_local_data_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the locally stored data files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.remove_all_taxid_files">
+<code class="sig-name descname">remove_all_taxid_files</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.remove_all_taxid_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.remove_all_taxid_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all local data files for this TaxID. Return a names list.</p>
+<p class="rubric">Examples</p>
+<p>To remove all local data files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">genome_collector</span> <span class="k">as</span> <span class="nn">gd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="n">gd</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">gd</span><span class="o">.</span><span class="n">remove_all_taxid_files</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+  <li class="prev">
+    <a href="index.html"
+       title="previous chapter">← Genome Collector</a>
+  </li>
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2019, Edinburgh Genome Foundry.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>
