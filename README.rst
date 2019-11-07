@@ -48,7 +48,7 @@ there).
 
 You can now use the ``db_path`` to start a BLAST process:
 
-.. code::
+.. code:: python
 
     import subprocess
     process = subprocess.run([
@@ -60,7 +60,7 @@ For convenience you can also BLAST in a single command, which will automatically
 create the path to the database, and even create the BLAST database from scratch
 if the data files aren't there:
 
-.. code::
+.. code:: python
 
     collection.blast_against_taxid('511145', 'nucl', [
         'blastn', '-query', 'blast_test.fa', "-out", 'result.txt'
@@ -129,8 +129,13 @@ be particularly useful in Dockerfiles to set up docker containers.
 
 
 By default these genomes will be downloaded to the platform-specific local
-data folder. This can be changed by setting an environment variable before
-running these commands.
+data folder. This can be changed by adding a data_dir at the end:
+
+.. code::
+
+    python -m genome_collector genome 511145 /path/to/some/dir/
+
+Or by setting an environment variable before running these commands:
 
 .. code::
 
@@ -151,6 +156,11 @@ Alternatively, you can unzip the sources in a folder and type
 .. code::
 
     sudo python setup.py install
+  
+For the BLAST-related features to work, you must have the NCBI BLAST software
+installed. For instance on Ubuntu install with:
+::
+    sudo apt-get install ncbi-blast+
 
 License = MIT
 --------------
