@@ -15,6 +15,7 @@ import proglog
 
 LOCAL_DIR = appdirs.user_data_dir(appname="genome_collector", appauthor="EGF")
 
+
 class GenomeCollection:
     """Collection of local data files including genomes and BLAST databases.
 
@@ -30,7 +31,7 @@ class GenomeCollection:
       that the system-specific user data directory will be used, so either
       ``~/.local/share/genome_collector`` on Linux, or
       ``~/Library/Application Support/genome_collector`` on MacOS, etc.
-    
+
     logger
       Logger to which the messages will be sent when downloading files or
       building blast databases. Use "bar" for a default bar logger, None
@@ -46,12 +47,12 @@ class GenomeCollection:
       False on a single ``collection`` instance, or at class level with
       ``GenomeCollection.autodownload = False`` to globally prevent Genome
       Collector from downloadind data files.
-    
+
     default_dir
       Default directory to use when parameter data_dir='default'. This
       attribute allows to set a global default_dir at the beginning of a
       script with ``GlobalCollection.default_dir = '/my/new/dir/'``
-    
+
     messages_prefix
       Prefix appearing as "[prefix] " in all logging messages.
 
@@ -69,7 +70,7 @@ class GenomeCollection:
     }
     autodownload = True
     messages_prefix = "[genome_collector] "
-    default_dir = os.environ.get('GENOME_COLLECTOR_DATA_DIR', LOCAL_DIR)
+    default_dir = os.environ.get("GENOME_COLLECTOR_DATA_DIR", LOCAL_DIR)
 
     def __init__(self, data_dir="default", logger="bar"):
         if data_dir == "default":
@@ -88,6 +89,20 @@ class GenomeCollection:
             random_id = random.randint(0, 10000)
             Entrez.email = "genome_collector_%s@replaceme.org" % random_id
 
+    def datafile_path(self, taxid, data_type):
+        """Return a standardized datafile path for the given TaxID.
+  
+        Unlike get methods such as ``self.get_taxid_genome_path()``, this
+        method only returns the path, and does not check whether the files
+        exist locally or not.
+
+        Parameter ``data_type`` should be one of genome_fasta, blast_nucl,
+        blast_prot, genome_gz, infos.
+        """
+        taxid = str(taxid)
+        filename = taxid + self.datafiles_extensions[data_type]
+        return os.path.join(self.data_dir, filename)
+
     def _get_taxid_genome_id_from_ncbi(self, taxid):
         """Return a Genome ID for this TaxID, provided by the NCBI API."""
         taxid = str(taxid)
@@ -104,20 +119,6 @@ class GenomeCollection:
             )
         return ids[0]
 
-    def datafile_path(self, taxid, data_type):
-        """Return a standardized datafile path for the given TaxID.
-        
-        Unlike get methods such as ``self.get_taxid_genome_path()``, this
-        method only returns the path, and does not check whether the files
-        exist locally or not.
-
-        Parameter ``data_type`` should be one of genome_fasta, blast_nucl,
-        blast_prot, genome_gz, infos.
-        """
-        taxid = str(taxid)
-        filename = taxid + self.datafiles_extensions[data_type]
-        return os.path.join(self.data_dir, filename)
-
     def download_taxid_genome_infos_from_ncbi(self, taxid):
         """Download infos on the TaxID and store them in '[taxid].json'."""
         taxid = str(taxid)
@@ -127,7 +128,7 @@ class GenomeCollection:
         # First get the corresponding genome ID, check that there is only one
 
         genome_id = self._get_taxid_genome_id_from_ncbi(taxid)
-        
+
         # Then search for the reference genome, check that there is only one
 
         search = Entrez.esummary(id=genome_id, db="genome", retmode="xml")
@@ -146,6 +147,7 @@ class GenomeCollection:
         results = Entrez.read(search)
         infos.update(dict(**results[0]))
         infos["taxID"] = taxid
+        infos["genomeID"] = genome_id
 
         # Finally, write the infos locally
 
@@ -190,7 +192,7 @@ class GenomeCollection:
 
     def get_taxid_infos(self, taxid):
         """Return a dict with data about the taxid.
-        
+
         Examples
         ========
 
@@ -237,7 +239,7 @@ class GenomeCollection:
 
     def generate_blast_db_for_taxid(self, taxid, db_type="nucl"):
         """Generates a Blast DB for the TaxID. Autodownload FASTA if needed.
-        
+
         ``db_type`` is either "nucl" (nucleotides database for blastn, blastx)
         or "prot" (protein database, untested).
         """
@@ -319,7 +321,7 @@ class GenomeCollection:
 
     def list_locally_available_taxids(self, data_type="infos"):
         """Return all taxIDs for which there is a local data file of this type.
-        
+
         Parameter ``data_type`` should be one of genome_fasta, blast_nucl,
         blast_prot, genome_gz, infos.
         """
@@ -360,7 +362,7 @@ class GenomeCollection:
                 removed_files.append(filename)
                 os.remove(os.path.join(self.data_dir, filename))
         return removed_files
-    
+
     def remove_all_local_data_files(self):
         """Remove all the locally stored data files"""
         for taxid in self.list_locally_available_taxids():
