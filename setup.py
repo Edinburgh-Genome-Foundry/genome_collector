@@ -15,4 +15,4 @@ setup(
     license='MIT',
     keywords="NCBI genomes TaxID BLAST",
     packages=find_packages(exclude='docs'),
-    install_requires=['appdirs', 'Biopython', 'pyyaml'])
+    install_requires=['appdirs', 'Biopython', 'pyyaml', 'proglog'])
