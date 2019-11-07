@@ -5,12 +5,13 @@ import re
 import gzip
 import subprocess
 import appdirs
+import json
 from urllib.request import urlretrieve
 
 
 from Bio import Entrez
 import proglog
-import yaml
+
 
 LOCAL_DIR = appdirs.user_data_dir(appname="genome_collector", appauthor="EGF")
 
@@ -64,7 +65,7 @@ class GenomeCollection:
         "blast_nucl": "_nucl",
         "blast_prot": "_prot",
         "genome_gz": ".fna.gz",
-        "infos": ".yaml",
+        "infos": ".json",
     }
     autodownload = True
     messages_prefix = "[genome_collector] "
@@ -118,7 +119,7 @@ class GenomeCollection:
         return os.path.join(self.data_dir, filename)
 
     def download_taxid_genome_infos_from_ncbi(self, taxid):
-        """Download infos on the TaxID and store them in '[taxid].yaml'."""
+        """Download infos on the TaxID and store them in '[taxid].json'."""
         taxid = str(taxid)
         self._autoset_entrez_email_if_none()
         self._log_message("Downloading infos for taxid %s from NCBI" % taxid)
@@ -152,7 +153,7 @@ class GenomeCollection:
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
         with open(path, "w") as f:
-            yaml.dump(infos, f)
+            json.dump(infos, f)
 
     def _get_taxid_assembly_url_from_ncbi(self, taxid):
         """Return a URL pointing to this taxid's genome sequence in NCBI."""
@@ -217,7 +218,7 @@ class GenomeCollection:
                 raise FileNotFoundError(error_message)
             self.download_taxid_genome_infos_from_ncbi(taxid)
         with open(path, "r") as f:
-            return yaml.load(f, Loader=yaml.FullLoader)
+            return json.load(f)
 
     def get_taxid_genome_path(self, taxid):
         """Return a path to the taxid's genome sequence. Download if needed."""
