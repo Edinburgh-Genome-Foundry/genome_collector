@@ -1,7 +1,6 @@
 import shutil
 import random
 import os
-import yaml
 import re
 import gzip
 import subprocess
@@ -11,6 +10,7 @@ from urllib.request import urlretrieve
 
 from Bio import Entrez
 import proglog
+import yaml
 
 LOCAL_DIR = appdirs.user_data_dir(appname="genome_collector", appauthor="EGF")
 
@@ -217,7 +217,7 @@ class GenomeCollection:
                 raise FileNotFoundError(error_message)
             self.download_taxid_genome_infos_from_ncbi(taxid)
         with open(path, "r") as f:
-            return yaml.load(f, Loader=yaml.CLoader)
+            return yaml.load(f, Loader=yaml.FullLoader)
 
     def get_taxid_genome_path(self, taxid):
         """Return a path to the taxid's genome sequence. Download if needed."""
