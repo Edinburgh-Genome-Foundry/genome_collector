@@ -6,6 +6,7 @@ import gzip
 import subprocess
 import appdirs
 import json
+import time
 from urllib.request import urlretrieve
 
 
@@ -71,12 +72,26 @@ class GenomeCollection:
     autodownload = True
     messages_prefix = "[genome_collector] "
     default_dir = os.environ.get("GENOME_COLLECTOR_DATA_DIR", LOCAL_DIR)
+    time_between_entrez_requests = 0.34
 
     def __init__(self, data_dir="default", logger="bar"):
         if data_dir == "default":
             data_dir = self.default_dir
         self.data_dir = data_dir
         self._logger = proglog.default_bar_logger(logger)
+        self._time_of_last_entrez_call = None
+    
+    def _wait_before_next_entrez_request(self):
+        now = time.time()
+        last_time = self._time_of_last_entrez_call
+        if last_time is not None:
+            elapsed = now - last_time
+            sleep_time = self.time_between_entrez_requests - elapsed
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+        self._time_of_last_entrez_call = time.time()
+
+
 
     def _log_message(self, message):
         """Send a message (with prefix) to the logger)"""
@@ -107,6 +122,7 @@ class GenomeCollection:
         """Return a Genome ID for this TaxID, provided by the NCBI API."""
         taxid = str(taxid)
         self._autoset_entrez_email_if_none()
+        self._wait_before_next_entrez_request()
         search = Entrez.esearch(
             term="txid" + taxid, db="genome", retmode="xml"
         )
@@ -130,7 +146,7 @@ class GenomeCollection:
         genome_id = self._get_taxid_genome_id_from_ncbi(taxid)
 
         # Then search for the reference genome, check that there is only one
-
+        self._wait_before_next_entrez_request()
         search = Entrez.esummary(id=genome_id, db="genome", retmode="xml")
         results = Entrez.read(search)
         if len(results) != 1:
@@ -142,7 +158,7 @@ class GenomeCollection:
 
         # So far so good, valid TaxID! Let us get more infos about that taxID
         # such as the scientific name, division, etc.
-
+        self._wait_before_next_entrez_request()
         search = Entrez.esummary(id=taxid, db="taxonomy", retmode="xml")
         results = Entrez.read(search)
         infos.update(dict(**results[0]))
@@ -165,6 +181,7 @@ class GenomeCollection:
             "Getting assembly URL for taxid %s from NCBI" % taxid
         )
         genome_infos = self.get_taxid_infos(taxid)
+        self._wait_before_next_entrez_request()
         search = Entrez.esummary(
             id=genome_infos["AssemblyID"], db="assembly", retmode="xml"
         )
