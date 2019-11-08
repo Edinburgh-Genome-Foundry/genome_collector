@@ -8,14 +8,17 @@ Genome Collector
    :target: https://coveralls.io/github/Edinburgh-Genome-Foundry/genome_collector?branch=master
 
 
-Genome Collector (full documentation `here <>`_) is a Python library to
+Genome Collector (full documentation `here <https://edinburgh-genome-foundry.github.io/genome_collector/>`_) is a Python library to
 download and store genomes and blast databases for specific TaxIDs. The data
 is downloaded automatically and on a need-to basis. This makes it very easy for
 Python libraries and web applications to use reference genomes of E. coli,
 S. cerevisiae, and so on, without the worry of manually downloading the
 genome data.
 
-For instance let's get a path to an E. coli BLAST database:
+Example
+-------
+
+Let's get a local path to an E. coli BLAST database:
 
 .. code:: python
 
