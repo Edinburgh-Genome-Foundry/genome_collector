@@ -482,6 +482,22 @@
             <span class="n">available_taxids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">available_taxids</span><span class="p">)))</span></div>
 
+<div class="viewcode-block" id="GenomeCollection.list_locally_available_taxids_names"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.list_locally_available_taxids_names">[docs]</a>    <span class="k">def</span> <span class="nf">list_locally_available_taxids_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a dictionnary {taxid: scientific_name} of all local taxIDs.</span>
+<span class="sd">        </span>
+<span class="sd">        For convenience, when print_mode is set to True, the table is printed</span>
+<span class="sd">        in alphabetical order instead of being returned as a dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">taxid</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_infos</span><span class="p">(</span><span class="n">taxid</span><span class="p">)[</span><span class="s2">&quot;ScientificName&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;infos&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">print_mode</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">taxid</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">name</span> <span class="k">for</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span></div>
+
 <div class="viewcode-block" id="GenomeCollection.remove_all_taxid_files"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.remove_all_taxid_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_all_taxid_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all local data files for this TaxID. Return a names list.</span>
 <span class="sd">        </span>
@@ -513,7 +529,6 @@
         <span class="sd">&quot;&quot;&quot;Remove all the locally stored data files&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">remove_all_taxid_files</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span></div></div>
-
 </pre></div>
 
           </div>
