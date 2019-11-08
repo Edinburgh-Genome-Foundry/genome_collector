@@ -4,7 +4,6 @@ import sys
 import pytest
 from genome_collector import GenomeCollection
 
-GenomeCollection.use_ncbi_ftp_via_https = True
 PHAGE_TAXID = "697289"
 
 

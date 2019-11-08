@@ -69,7 +69,7 @@ class GenomeCollection:
         "infos": ".json",
     }
     autodownload = True
-    use_ncbi_ftp_via_https = False
+    use_ncbi_ftp_via_https = True
     messages_prefix = "[genome_collector] "
     default_dir = os.environ.get("GENOME_COLLECTOR_DATA_DIR", LOCAL_DIR)
 
