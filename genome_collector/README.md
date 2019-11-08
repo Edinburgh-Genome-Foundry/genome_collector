@@ -4,7 +4,7 @@ The main mechanism of ``genome_collector`` is that data files are always
 downloaded as needed and in the same order:
 
 ```
-infos.json => genome.fa => blast_database.nsq
+infos.json => genomic.fna.gz => genomic.fa => blast_database.nsq
 ```
 
 For instance, when running ``collection.get_taxid_blastdb_path(12345, 'nucl')``, the

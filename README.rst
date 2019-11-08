@@ -144,7 +144,7 @@ Alternatively, you can unzip the sources in a folder and type
 .. code::
 
     sudo python setup.py install
-  
+
 For the BLAST-related features to work, you must have the NCBI BLAST software
 installed. For instance on Ubuntu install with:
 ::
