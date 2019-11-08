@@ -19,9 +19,6 @@ LOCAL_DIR = appdirs.user_data_dir(appname="genome_collector", appauthor="EGF")
 class GenomeCollection:
     """Collection of local data files including genomes and BLAST databases.
 
-    To prevent the collection from downloading
-    ``GenomeCollection.autodownload = False``
-
     Parameters
     ==========
 

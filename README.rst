@@ -42,7 +42,7 @@ Result:
     /home/USER/.local/share/genome_collector/511145_nucl
 
 
-What happened: Genome Collector first created a path to your local
+**What happened:** Genome Collector first created a path to your local
 nucleotide BLAST database, then noticed that the BLAST database was not already
 available on the machine at this path, so it downloaded the genome data and built the
 BLAST database to make sure that the returned path actually points to a database
@@ -73,8 +73,8 @@ if the data files aren't there:
 Usage tips
 ----------
 
-Changing data storage directory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Changing the data storage directory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can decide where a collection's local files will be stored with the
 ``data_dir`` parameter of ``GenomeCollection``. Note that the default value for
