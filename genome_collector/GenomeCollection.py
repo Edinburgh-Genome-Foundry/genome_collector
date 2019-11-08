@@ -69,6 +69,7 @@ class GenomeCollection:
         "infos": ".json",
     }
     autodownload = True
+    use_ncbi_ftp_via_https = False
     messages_prefix = "[genome_collector] "
     default_dir = os.environ.get("GENOME_COLLECTOR_DATA_DIR", LOCAL_DIR)
 
@@ -173,6 +174,8 @@ class GenomeCollection:
             "FtpPath_RefSeq"
         ]
         basename = ftp_path.split("/")[-1]
+        if self.use_ncbi_ftp_via_https:
+            ftp_path = ftp_path.replace("ftp:", "https:")
         return "/".join([ftp_path, basename + "_genomic.fna.gz"])
 
     def download_taxid_genome_from_ncbi(self, taxid):
