@@ -65,9 +65,9 @@ Changing the data storage directory
 You can decide where a collection's local files will be stored with the
 ``data_dir`` parameter of ``GenomeCollection``. Note that the default value for
 ``data_dir`` is highly recommended as it always points to the same local user
-data folder. As a consequence, all librairies and applications using the default
-will be able to pick genomes from the same folder. The path of this default
-folder, stored at ``collection.data_dir``, is platform-specific:
+data folder. As a consequence, all librairies and applications using the
+default will be able to pick genomes from the same folder. The path of this
+default ``collection.data_dir`` is platform-specific:
 
 - ``~/.local/share/genome_collector`` on Linux
 - ``~/Library/Application Support/genome_collector`` on MacOS
@@ -123,12 +123,6 @@ data folder. This can be changed by adding a data_dir at the end:
 .. code::
 
     python -m genome_collector genome 511145 /path/to/some/dir/
-
-Or by setting an environment variable before running these commands:
-
-.. code::
-
-    env GENOME_COLLECTOR_DATA_DIR = /my/other/path
 
 Installation
 -------------
