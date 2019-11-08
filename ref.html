@@ -118,8 +118,6 @@
 <dt id="genome_collector.GenomeCollection">
 <em class="property">class </em><code class="sig-prename descclassname">genome_collector.</code><code class="sig-name descname">GenomeCollection</code><span class="sig-paren">(</span><em class="sig-param">data_dir='default'</em>, <em class="sig-param">logger='bar'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Collection of local data files including genomes and BLAST databases.</p>
-<p>To prevent the collection from downloading
-<code class="docutils literal notranslate"><span class="pre">GenomeCollection.autodownload</span> <span class="pre">=</span> <span class="pre">False</span></code></p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data_dir</strong></p>
@@ -193,17 +191,25 @@ it will be downloaded.</p>
 <dt id="genome_collector.GenomeCollection.datafile_path">
 <code class="sig-name descname">datafile_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.datafile_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.datafile_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a standardized datafile path for the given TaxID.</p>
-<p>Unlike get methods such as <code class="docutils literal notranslate"><span class="pre">self.get_taxid_genome_path()</span></code>, this
+<p>Unlike get methods such as <code class="docutils literal notranslate"><span class="pre">self.get_taxid_genome_data_path()</span></code>, this
 method only returns the path, and does not check whether the files
 exist locally or not.</p>
-<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genome_fasta, blast_nucl,
-blast_prot, genome_gz, infos.</p>
+<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genomic_fasta, protein_fasta,
+blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.download_taxid_genome_data_from_ncbi">
+<code class="sig-name descname">download_taxid_genome_data_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.download_taxid_genome_data_from_ncbi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_data_from_ncbi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download and uncompress a gz file from archives.</p>
+<p>data_type is either genomic_fasta, genomic_genbank, genomic_gff,
+or protein_fasta.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi">
 <code class="sig-name descname">download_taxid_genome_infos_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.download_taxid_genome_infos_from_ncbi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi" title="Permalink to this definition">¶</a></dt>
-<dd><p>Download infos on the TaxID and store them in ‘[taxid].yaml’.</p>
+<dd><p>Download infos on the TaxID and store them in ‘[taxid].json’.</p>
 </dd></dl>
 
 <dl class="method">
@@ -223,9 +229,11 @@ or “prot” (protein database, untested).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="genome_collector.GenomeCollection.get_taxid_genome_path">
-<code class="sig-name descname">get_taxid_genome_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_genome_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_genome_path" title="Permalink to this definition">¶</a></dt>
+<dt id="genome_collector.GenomeCollection.get_taxid_genome_data_path">
+<code class="sig-name descname">get_taxid_genome_data_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type='genomic_fasta'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_genome_data_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_genome_data_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a path to the taxid’s genome sequence. Download if needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">data_type</span></code> is either genomic_fasta, genomic_genbank, genomic_gff,
+or protein_fasta</p>
 </dd></dl>
 
 <dl class="method">
@@ -249,8 +257,8 @@ or “prot” (protein database, untested).</p>
 <dt id="genome_collector.GenomeCollection.list_locally_available_taxids">
 <code class="sig-name descname">list_locally_available_taxids</code><span class="sig-paren">(</span><em class="sig-param">data_type='infos'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.list_locally_available_taxids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.list_locally_available_taxids" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return all taxIDs for which there is a local data file of this type.</p>
-<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genome_fasta, blast_nucl,
-blast_prot, genome_gz, infos.</p>
+<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genomic_fasta, protein_fasta,
+blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</p>
 </dd></dl>
 
 <dl class="method">

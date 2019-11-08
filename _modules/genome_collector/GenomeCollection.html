@@ -111,20 +111,20 @@
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">appdirs</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlretrieve</span>
 
 
 <span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">Entrez</span>
 <span class="kn">import</span> <span class="nn">proglog</span>
-<span class="kn">import</span> <span class="nn">yaml</span>
+
 
 <span class="n">LOCAL_DIR</span> <span class="o">=</span> <span class="n">appdirs</span><span class="o">.</span><span class="n">user_data_dir</span><span class="p">(</span><span class="n">appname</span><span class="o">=</span><span class="s2">&quot;genome_collector&quot;</span><span class="p">,</span> <span class="n">appauthor</span><span class="o">=</span><span class="s2">&quot;EGF&quot;</span><span class="p">)</span>
 
+
 <div class="viewcode-block" id="GenomeCollection"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection">[docs]</a><span class="k">class</span> <span class="nc">GenomeCollection</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Collection of local data files including genomes and BLAST databases.</span>
-
-<span class="sd">    To prevent the collection from downloading</span>
-<span class="sd">    ``GenomeCollection.autodownload = False``</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ==========</span>
@@ -135,7 +135,7 @@
 <span class="sd">      that the system-specific user data directory will be used, so either</span>
 <span class="sd">      ``~/.local/share/genome_collector`` on Linux, or</span>
 <span class="sd">      ``~/Library/Application Support/genome_collector`` on MacOS, etc.</span>
-<span class="sd">    </span>
+
 <span class="sd">    logger</span>
 <span class="sd">      Logger to which the messages will be sent when downloading files or</span>
 <span class="sd">      building blast databases. Use &quot;bar&quot; for a default bar logger, None</span>
@@ -151,12 +151,12 @@
 <span class="sd">      False on a single ``collection`` instance, or at class level with</span>
 <span class="sd">      ``GenomeCollection.autodownload = False`` to globally prevent Genome</span>
 <span class="sd">      Collector from downloadind data files.</span>
-<span class="sd">    </span>
+
 <span class="sd">    default_dir</span>
 <span class="sd">      Default directory to use when parameter data_dir=&#39;default&#39;. This</span>
 <span class="sd">      attribute allows to set a global default_dir at the beginning of a</span>
 <span class="sd">      script with ``GlobalCollection.default_dir = &#39;/my/new/dir/&#39;``</span>
-<span class="sd">    </span>
+
 <span class="sd">    messages_prefix</span>
 <span class="sd">      Prefix appearing as &quot;[prefix] &quot; in all logging messages.</span>
 
@@ -166,21 +166,40 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">datafiles_extensions</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;genome_fasta&quot;</span><span class="p">:</span> <span class="s2">&quot;.fa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_fasta&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.fa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_genbank&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_gff&quot;</span><span class="p">:</span> <span class="s2">&quot;_gff.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protein_fasta&quot;</span><span class="p">:</span> <span class="s2">&quot;_protein.fa&quot;</span><span class="p">,</span>
         <span class="s2">&quot;blast_nucl&quot;</span><span class="p">:</span> <span class="s2">&quot;_nucl&quot;</span><span class="p">,</span>
         <span class="s2">&quot;blast_prot&quot;</span><span class="p">:</span> <span class="s2">&quot;_prot&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;genome_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;.fna.gz&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;infos&quot;</span><span class="p">:</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_fasta_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.fna.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_genbank_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.gbff.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_gff_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.gff.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protein_fasta_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_protein.faa.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;infos&quot;</span><span class="p">:</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">autodownload</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">use_ncbi_ftp_via_https</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">messages_prefix</span> <span class="o">=</span> <span class="s2">&quot;[genome_collector] &quot;</span>
-    <span class="n">default_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;GENOME_COLLECTOR_DATA_DIR&#39;</span><span class="p">,</span> <span class="n">LOCAL_DIR</span><span class="p">)</span>
+    <span class="n">default_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GENOME_COLLECTOR_DATA_DIR&quot;</span><span class="p">,</span> <span class="n">LOCAL_DIR</span><span class="p">)</span>
+    <span class="n">time_between_entrez_requests</span> <span class="o">=</span> <span class="mf">0.34</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="s2">&quot;bar&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data_dir</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
             <span class="n">data_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">data_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">proglog</span><span class="o">.</span><span class="n">default_bar_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_of_last_entrez_call</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_wait_before_next_entrez_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">last_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_of_last_entrez_call</span>
+        <span class="k">if</span> <span class="n">last_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_time</span>
+            <span class="n">sleep_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_between_entrez_requests</span> <span class="o">-</span> <span class="n">elapsed</span>
+            <span class="k">if</span> <span class="n">sleep_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_of_last_entrez_call</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_log_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Send a message (with prefix) to the logger)&quot;&quot;&quot;</span>
@@ -193,10 +212,25 @@
             <span class="n">random_id</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
             <span class="n">Entrez</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;genome_collector_</span><span class="si">%s</span><span class="s2">@replaceme.org&quot;</span> <span class="o">%</span> <span class="n">random_id</span>
 
+<div class="viewcode-block" id="GenomeCollection.datafile_path"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.datafile_path">[docs]</a>    <span class="k">def</span> <span class="nf">datafile_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a standardized datafile path for the given TaxID.</span>
+<span class="sd">  </span>
+<span class="sd">        Unlike get methods such as ``self.get_taxid_genome_data_path()``, this</span>
+<span class="sd">        method only returns the path, and does not check whether the files</span>
+<span class="sd">        exist locally or not.</span>
+
+<span class="sd">        Parameter ``data_type`` should be one of genomic_fasta, protein_fasta,</span>
+<span class="sd">        blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">taxid</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_get_taxid_genome_id_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a Genome ID for this TaxID, provided by the NCBI API.&quot;&quot;&quot;</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_autoset_entrez_email_if_none</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
         <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esearch</span><span class="p">(</span>
             <span class="n">term</span><span class="o">=</span><span class="s2">&quot;txid&quot;</span> <span class="o">+</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;genome&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span>
         <span class="p">)</span>
@@ -209,32 +243,17 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<div class="viewcode-block" id="GenomeCollection.datafile_path"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.datafile_path">[docs]</a>    <span class="k">def</span> <span class="nf">datafile_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a standardized datafile path for the given TaxID.</span>
-<span class="sd">        </span>
-<span class="sd">        Unlike get methods such as ``self.get_taxid_genome_path()``, this</span>
-<span class="sd">        method only returns the path, and does not check whether the files</span>
-<span class="sd">        exist locally or not.</span>
-
-<span class="sd">        Parameter ``data_type`` should be one of genome_fasta, blast_nucl,</span>
-<span class="sd">        blast_prot, genome_gz, infos.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">taxid</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
-
 <div class="viewcode-block" id="GenomeCollection.download_taxid_genome_infos_from_ncbi"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi">[docs]</a>    <span class="k">def</span> <span class="nf">download_taxid_genome_infos_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Download infos on the TaxID and store them in &#39;[taxid].yaml&#39;.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Download infos on the TaxID and store them in &#39;[taxid].json&#39;.&quot;&quot;&quot;</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_autoset_entrez_email_if_none</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Downloading infos for taxid </span><span class="si">%s</span><span class="s2"> from NCBI&quot;</span> <span class="o">%</span> <span class="n">taxid</span><span class="p">)</span>
 
         <span class="c1"># First get the corresponding genome ID, check that there is only one</span>
-
         <span class="n">genome_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_taxid_genome_id_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        
-        <span class="c1"># Then search for the reference genome, check that there is only one</span>
 
+        <span class="c1"># Then search for the reference genome, check that there is only one</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
         <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esummary</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">genome_id</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;genome&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">)</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
@@ -246,11 +265,12 @@
 
         <span class="c1"># So far so good, valid TaxID! Let us get more infos about that taxID</span>
         <span class="c1"># such as the scientific name, division, etc.</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
         <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esummary</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">taxid</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;taxonomy&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">)</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
         <span class="n">infos</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">infos</span><span class="p">[</span><span class="s2">&quot;taxID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">taxid</span>
+        <span class="n">infos</span><span class="p">[</span><span class="s2">&quot;genomeID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genome_id</span>
 
         <span class="c1"># Finally, write the infos locally</span>
 
@@ -258,16 +278,21 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">infos</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">infos</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_taxid_assembly_url_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a URL pointing to this taxid&#39;s genome sequence in NCBI.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_get_taxid_assembly_url_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a URL pointing to this taxid&#39;s genome sequence in NCBI.</span>
+<span class="sd">        </span>
+<span class="sd">        data_type can be either genomic_fasta, protein_fasta, genomic_genbank,</span>
+<span class="sd">        genomic_gff</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_autoset_entrez_email_if_none</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span>
             <span class="s2">&quot;Getting assembly URL for taxid </span><span class="si">%s</span><span class="s2"> from NCBI&quot;</span> <span class="o">%</span> <span class="n">taxid</span>
         <span class="p">)</span>
         <span class="n">genome_infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_infos</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
         <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esummary</span><span class="p">(</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">genome_infos</span><span class="p">[</span><span class="s2">&quot;AssemblyID&quot;</span><span class="p">],</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;assembly&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span>
         <span class="p">)</span>
@@ -276,26 +301,37 @@
             <span class="s2">&quot;FtpPath_RefSeq&quot;</span>
         <span class="p">]</span>
         <span class="n">basename</span> <span class="o">=</span> <span class="n">ftp_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ftp_path</span><span class="p">,</span> <span class="n">basename</span> <span class="o">+</span> <span class="s2">&quot;_genomic.fna.gz&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_ncbi_ftp_via_https</span><span class="p">:</span>
+            <span class="n">ftp_path</span> <span class="o">=</span> <span class="n">ftp_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;ftp:&quot;</span><span class="p">,</span> <span class="s2">&quot;https:&quot;</span><span class="p">)</span>
+        <span class="n">extension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_gz&quot;</span> <span class="o">%</span> <span class="n">data_type</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ftp_path</span><span class="p">,</span> <span class="n">basename</span> <span class="o">+</span> <span class="n">extension</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">download_taxid_genome_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
+<div class="viewcode-block" id="GenomeCollection.download_taxid_genome_data_from_ncbi"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.download_taxid_genome_data_from_ncbi">[docs]</a>    <span class="k">def</span> <span class="nf">download_taxid_genome_data_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Download and uncompress a gz file from archives.</span>
+<span class="sd">        </span>
+<span class="sd">        data_type is either genomic_fasta, genomic_genbank, genomic_gff,</span>
+<span class="sd">        or protein_fasta.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Downloading genome for taxid </span><span class="si">%s</span><span class="s2"> from NCBI&quot;</span> <span class="o">%</span> <span class="n">taxid</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;TaxID </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Getting NCBI URL for </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        <span class="n">ftp_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_taxid_assembly_url_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        <span class="n">target_gz_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="s2">&quot;genome_gz&quot;</span><span class="p">)</span>
-        <span class="n">target_fa_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="s2">&quot;genome_fasta&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Downloading genome FASTA for taxID </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">taxid</span><span class="p">)</span>
+        <span class="n">ftp_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_taxid_assembly_url_from_ncbi</span><span class="p">(</span>
+            <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span>
+        <span class="p">)</span>
+        <span class="n">target_gz_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_gz&quot;</span> <span class="o">%</span> <span class="n">data_type</span><span class="p">)</span>
+        <span class="n">target_data_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Downloading </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
         <span class="n">urlretrieve</span><span class="p">(</span><span class="n">ftp_url</span><span class="p">,</span> <span class="n">target_gz_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Now unzipping genome FASTA for taxID </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">taxid</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_fa_file</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_fasta</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Unzipping  </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_data_file</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_fasta</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">target_gz_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_gz</span><span class="p">:</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_gz</span><span class="p">,</span> <span class="n">f_fasta</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Finished downloading genome for taxID </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Done downloading </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GenomeCollection.get_taxid_infos"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.get_taxid_infos">[docs]</a>    <span class="k">def</span> <span class="nf">get_taxid_infos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a dict with data about the taxid.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Examples</span>
 <span class="sd">        ========</span>
 
@@ -323,12 +359,16 @@
                 <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">download_taxid_genome_infos_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">CLoader</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GenomeCollection.get_taxid_genome_path"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.get_taxid_genome_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_taxid_genome_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a path to the taxid&#39;s genome sequence. Download if needed.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GenomeCollection.get_taxid_genome_data_path"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.get_taxid_genome_data_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_taxid_genome_data_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;genomic_fasta&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a path to the taxid&#39;s genome sequence. Download if needed.</span>
+<span class="sd">        </span>
+<span class="sd">        ``data_type`` is either genomic_fasta, genomic_genbank, genomic_gff,</span>
+<span class="sd">        or protein_fasta</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="o">=</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;genome_fasta&quot;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="o">=</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">autodownload</span><span class="p">:</span>
                 <span class="n">error_message</span> <span class="o">=</span> <span class="p">(</span>
@@ -337,17 +377,20 @@
                     <span class="s2">&quot;genome_collector.settings&quot;</span>
                 <span class="p">)</span> <span class="o">%</span> <span class="n">taxid</span>
                 <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">download_taxid_genome_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">download_taxid_genome_data_from_ncbi</span><span class="p">(</span>
+                <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">path</span></div>
 
 <div class="viewcode-block" id="GenomeCollection.generate_blast_db_for_taxid"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.generate_blast_db_for_taxid">[docs]</a>    <span class="k">def</span> <span class="nf">generate_blast_db_for_taxid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">db_type</span><span class="o">=</span><span class="s2">&quot;nucl&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Generates a Blast DB for the TaxID. Autodownload FASTA if needed.</span>
-<span class="sd">        </span>
+
 <span class="sd">        ``db_type`` is either &quot;nucl&quot; (nucleotides database for blastn, blastx)</span>
 <span class="sd">        or &quot;prot&quot; (protein database, untested).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
-        <span class="n">fa_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_genome_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>  <span class="c1"># may autodownload</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;nucl&quot;</span><span class="p">:</span> <span class="s2">&quot;genomic_fasta&quot;</span><span class="p">,</span> <span class="s2">&quot;prot&quot;</span><span class="p">:</span> <span class="s2">&quot;protein_fasta&quot;</span><span class="p">}[</span><span class="n">db_type</span><span class="p">]</span>
+        <span class="n">fa_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_genome_data_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
         <span class="n">db_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="o">=</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;blast_&quot;</span> <span class="o">+</span> <span class="n">db_type</span><span class="p">)</span>
         <span class="n">blast_args</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;makeblastdb&quot;</span><span class="p">,</span>
@@ -424,9 +467,9 @@
 
 <div class="viewcode-block" id="GenomeCollection.list_locally_available_taxids"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.list_locally_available_taxids">[docs]</a>    <span class="k">def</span> <span class="nf">list_locally_available_taxids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;infos&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return all taxIDs for which there is a local data file of this type.</span>
-<span class="sd">        </span>
-<span class="sd">        Parameter ``data_type`` should be one of genome_fasta, blast_nucl,</span>
-<span class="sd">        blast_prot, genome_gz, infos.</span>
+
+<span class="sd">        Parameter ``data_type`` should be one of genomic_fasta, protein_fasta,</span>
+<span class="sd">        blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">extension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span>
         <span class="n">local_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
@@ -465,7 +508,7 @@
                 <span class="n">removed_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">removed_files</span></div>
-    
+
 <div class="viewcode-block" id="GenomeCollection.remove_all_local_data_files"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.remove_all_local_data_files">[docs]</a>    <span class="k">def</span> <span class="nf">remove_all_local_data_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all the locally stored data files&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">():</span>
