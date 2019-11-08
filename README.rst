@@ -68,7 +68,7 @@ if the data files aren't there:
 
 
 Usage tips
-==========
+----------
 
 Changing data storage directory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
