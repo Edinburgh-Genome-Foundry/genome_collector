@@ -376,6 +376,22 @@ class GenomeCollection:
             available_taxids.append(match.groups()[0])
         return sorted(list(set(available_taxids)))
 
+    def list_locally_available_taxids_names(self, print_mode=False):
+        """Return a dictionnary {taxid: scientific_name} of all local taxIDs.
+        
+        For convenience, when print_mode is set to True, the table is printed
+        in alphabetical order instead of being returned as a dict.
+        """
+        result = {
+            taxid: self.get_taxid_infos(taxid)["ScientificName"]
+            for taxid in self.list_locally_available_taxids(data_type="infos")
+        }
+        if print_mode:
+            items = sorted(result.items(), key=lambda item: item[1])
+            print("\n".join([taxid.ljust(10) + name for taxid, name in items]))
+        else:
+            return result
+
     def remove_all_taxid_files(self, taxid):
         """Remove all local data files for this TaxID. Return a names list.
         
@@ -407,4 +423,3 @@ class GenomeCollection:
         """Remove all the locally stored data files"""
         for taxid in self.list_locally_available_taxids():
             self.remove_all_taxid_files(taxid)
-

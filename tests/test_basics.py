@@ -78,6 +78,12 @@ def test_list_taxids(tmpdir):
     found_taxids = collection.list_locally_available_taxids("genomic_fasta")
     assert found_taxids == [PHAGE_TAXID]
 
+    found_taxids = collection.list_locally_available_taxids_names()
+    assert len(found_taxids) == 3
+
+    # For coverage!
+    collection.list_locally_available_taxids_names(print_mode=True)
+
 
 def test_get_various_datatypes(tmpdir):
     collection = GenomeCollection(data_dir=str(tmpdir))

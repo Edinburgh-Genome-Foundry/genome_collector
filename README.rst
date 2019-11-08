@@ -147,7 +147,9 @@ Alternatively, you can unzip the sources in a folder and type
 
 For the BLAST-related features to work, you must have the NCBI BLAST software
 installed. For instance on Ubuntu install with:
-::
+
+.. code::
+
     sudo apt-get install ncbi-blast+
 
 License = MIT
