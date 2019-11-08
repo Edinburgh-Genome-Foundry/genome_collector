@@ -25,29 +25,12 @@ Let's get a local path to an E. coli BLAST database:
     from genome_collector import GenomeCollection
     collection = GenomeCollection()
     db_path = collection.get_taxid_blastdb_path(taxid=511145, db_type='nucl')
-    print (db_path)
 
-Result:
-
-.. code::
-
-    [genome_collector] Downloading genome for taxid 511145 from NCBI
-    [genome_collector] Getting assembly URL for taxid 511145 from NCBI
-    [genome_collector] Downloading infos for taxid 511145 from NCBI
-    [genome_collector] Downloading genome FASTA for taxID 511145
-    [genome_collector] Now unzipping genome FASTA for taxID 511145.
-    [genome_collector] Finished downloading genome for taxID 511145
-    [genome_collector] Generating nucl BLAST DB for taxid 511145
-    [genome_collector] Done generating nucl BLAST DB for taxid 511145
-    /home/USER/.local/share/genome_collector/511145_nucl
-
-
-**What happened:** Genome Collector first created a path to your local
-nucleotide BLAST database, then noticed that the BLAST database was not already
-available on the machine at this path, so it downloaded the genome data and built the
-BLAST database to make sure that the returned path actually points to a database
-(this is a one-off download which won't happen again as long as the files stay
-there).
+The returned ``db_path`` is a path to a local nucleotide BLAST database for
+E. coli. If there was no E. coli database on your machine, Genome Collector
+downloaded the genome data and built the BLAST database to make sure that
+the returned path actually points to a database (this is a one-off download
+which won't happen again as long as the files stay there).
 
 You can now use the ``db_path`` to start a BLAST process:
 
@@ -60,8 +43,8 @@ You can now use the ``db_path`` to start a BLAST process:
 
 
 For convenience you can also BLAST in a single command, which will automatically
-create the path to the database, and even create the BLAST database from scratch
-if the data files aren't there:
+create the path to the database, and create the BLAST database from scratch
+if it doesn't exist:
 
 .. code:: python
 
@@ -143,7 +126,6 @@ Or by setting an environment variable before running these commands:
 .. code::
 
     env GENOME_COLLECTOR_DATA_DIR = /my/other/path
-
 
 Installation
 -------------
