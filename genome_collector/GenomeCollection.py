@@ -60,10 +60,16 @@ class GenomeCollection:
     """
 
     datafiles_extensions = {
-        "genome_fasta": ".fa",
+        "genomic_fasta": "_genomic.fa",
+        "genomic_genbank": "_genomic.gb",
+        "genomic_gff": "_gff.gb",
+        "protein_fasta": "_protein.fa",
         "blast_nucl": "_nucl",
         "blast_prot": "_prot",
-        "genome_gz": ".fna.gz",
+        "genomic_fasta_gz": "_genomic.fna.gz",
+        "genomic_genbank_gz": "_genomic.gbff.gz",
+        "genomic_gff_gz": "_genomic.gff.gz",
+        "protein_fasta_gz": "_protein.faa.gz",
         "infos": ".json",
     }
     autodownload = True
@@ -78,7 +84,7 @@ class GenomeCollection:
         self.data_dir = data_dir
         self._logger = proglog.default_bar_logger(logger)
         self._time_of_last_entrez_call = None
-    
+
     def _wait_before_next_entrez_request(self):
         now = time.time()
         last_time = self._time_of_last_entrez_call
@@ -88,8 +94,6 @@ class GenomeCollection:
             if sleep_time > 0:
                 time.sleep(sleep_time)
         self._time_of_last_entrez_call = time.time()
-
-
 
     def _log_message(self, message):
         """Send a message (with prefix) to the logger)"""
@@ -105,12 +109,12 @@ class GenomeCollection:
     def datafile_path(self, taxid, data_type):
         """Return a standardized datafile path for the given TaxID.
   
-        Unlike get methods such as ``self.get_taxid_genome_path()``, this
+        Unlike get methods such as ``self.get_taxid_genome_data_path()``, this
         method only returns the path, and does not check whether the files
         exist locally or not.
 
-        Parameter ``data_type`` should be one of genome_fasta, blast_nucl,
-        blast_prot, genome_gz, infos.
+        Parameter ``data_type`` should be one of genomic_fasta, protein_fasta,
+        blast_nucl, blast_prot, genomic_gz, protein_gz, infos.
         """
         taxid = str(taxid)
         filename = taxid + self.datafiles_extensions[data_type]
@@ -140,7 +144,6 @@ class GenomeCollection:
         self._log_message("Downloading infos for taxid %s from NCBI" % taxid)
 
         # First get the corresponding genome ID, check that there is only one
-
         genome_id = self._get_taxid_genome_id_from_ncbi(taxid)
 
         # Then search for the reference genome, check that there is only one
@@ -171,8 +174,12 @@ class GenomeCollection:
         with open(path, "w") as f:
             json.dump(infos, f)
 
-    def _get_taxid_assembly_url_from_ncbi(self, taxid):
-        """Return a URL pointing to this taxid's genome sequence in NCBI."""
+    def _get_taxid_assembly_url_from_ncbi(self, taxid, data_type):
+        """Return a URL pointing to this taxid's genome sequence in NCBI.
+        
+        data_type can be either genomic_fasta, protein_fasta, genomic_genbank,
+        genomic_gff
+        """
         taxid = str(taxid)
         self._autoset_entrez_email_if_none()
         self._log_message(
@@ -190,22 +197,31 @@ class GenomeCollection:
         basename = ftp_path.split("/")[-1]
         if self.use_ncbi_ftp_via_https:
             ftp_path = ftp_path.replace("ftp:", "https:")
-        return "/".join([ftp_path, basename + "_genomic.fna.gz"])
+        extension = self.datafiles_extensions["%s_gz" % data_type]
+        return "/".join([ftp_path, basename + extension])
 
-    def download_taxid_genome_from_ncbi(self, taxid):
+    def download_taxid_genome_data_from_ncbi(self, taxid, data_type):
+        """Download and uncompress a gz file from archives.
+        
+        data_type is either genomic_fasta, genomic_genbank, genomic_gff,
+        or protein_fasta.
+        """
         taxid = str(taxid)
-        self._log_message("Downloading genome for taxid %s from NCBI" % taxid)
+        query = "TaxID %s %s" % (data_type, taxid)
+        self._log_message("Getting NCBI URL for %s." % query)
         taxid = str(taxid)
-        ftp_url = self._get_taxid_assembly_url_from_ncbi(taxid)
-        target_gz_file = self.datafile_path(taxid, "genome_gz")
-        target_fa_file = self.datafile_path(taxid, "genome_fasta")
-        self._log_message("Downloading genome FASTA for taxID %s" % taxid)
+        ftp_url = self._get_taxid_assembly_url_from_ncbi(
+            taxid, data_type=data_type
+        )
+        target_gz_file = self.datafile_path(taxid, "%s_gz" % data_type)
+        target_data_file = self.datafile_path(taxid, data_type)
+        self._log_message("Downloading %s." % query)
         urlretrieve(ftp_url, target_gz_file)
-        self._log_message("Now unzipping genome FASTA for taxID %s." % taxid)
-        with open(target_fa_file, "wb") as f_fasta:
+        self._log_message("Unzipping  %s." % query)
+        with open(target_data_file, "wb") as f_fasta:
             with gzip.open(target_gz_file, "rb") as f_gz:
                 shutil.copyfileobj(f_gz, f_fasta)
-        self._log_message("Finished downloading genome for taxID %s" % taxid)
+        self._log_message("Done downloading %s." % query)
 
     def get_taxid_infos(self, taxid):
         """Return a dict with data about the taxid.
@@ -239,10 +255,14 @@ class GenomeCollection:
         with open(path, "r") as f:
             return json.load(f)
 
-    def get_taxid_genome_path(self, taxid):
-        """Return a path to the taxid's genome sequence. Download if needed."""
+    def get_taxid_genome_data_path(self, taxid, data_type="genomic_fasta"):
+        """Return a path to the taxid's genome sequence. Download if needed.
+        
+        ``data_type`` is either genomic_fasta, genomic_genbank, genomic_gff,
+        or protein_fasta
+        """
         taxid = str(taxid)
-        path = self.datafile_path(taxid=taxid, data_type="genome_fasta")
+        path = self.datafile_path(taxid=taxid, data_type=data_type)
         if not os.path.exists(path):
             if not self.autodownload:
                 error_message = (
@@ -251,7 +271,9 @@ class GenomeCollection:
                     "genome_collector.settings"
                 ) % taxid
                 raise FileNotFoundError(error_message)
-            self.download_taxid_genome_from_ncbi(taxid)
+            self.download_taxid_genome_data_from_ncbi(
+                taxid, data_type=data_type
+            )
         return path
 
     def generate_blast_db_for_taxid(self, taxid, db_type="nucl"):
@@ -261,7 +283,8 @@ class GenomeCollection:
         or "prot" (protein database, untested).
         """
         taxid = str(taxid)
-        fa_path = self.get_taxid_genome_path(taxid)  # may autodownload
+        data_type = {"nucl": "genomic_fasta", "prot": "protein_fasta"}[db_type]
+        fa_path = self.get_taxid_genome_data_path(taxid, data_type=data_type)
         db_path = self.datafile_path(taxid=taxid, data_type="blast_" + db_type)
         blast_args = [
             "makeblastdb",
@@ -339,8 +362,8 @@ class GenomeCollection:
     def list_locally_available_taxids(self, data_type="infos"):
         """Return all taxIDs for which there is a local data file of this type.
 
-        Parameter ``data_type`` should be one of genome_fasta, blast_nucl,
-        blast_prot, genome_gz, infos.
+        Parameter ``data_type`` should be one of genomic_fasta, protein_fasta,
+        blast_nucl, blast_prot, genomic_gz, protein_gz, infos.
         """
         extension = self.datafiles_extensions[data_type]
         local_files = os.listdir(self.data_dir)
