@@ -121,6 +121,14 @@ class GenomeCollection(BlastMixin, NCBIMixin, FileManagerMixin, BowtieMixin):
     def get_taxid_biopython_records(
         self, taxid, source_type="genomic_genbank", as_iterator=False
     ):
+        """Return a list of biopython records for the genome's chromosome.
+        
+        Even if there is a single record (for genomes with a single chromosome,
+        a list is returned.
+
+        For huge genomes, use the ``as_iterator`` option to return a Python
+        iterator, which avoids to load all chromosomes at once in memory.
+        """
         path = self.get_taxid_genome_data_path(taxid, data_type=source_type)
         data_format = source_type.split("_")[1]
         records = SeqIO.parse(path, data_format)
