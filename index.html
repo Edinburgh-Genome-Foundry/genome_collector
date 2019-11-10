@@ -106,7 +106,10 @@
 <hr>
           <div class="content" role="main">
             
-  <div class="section" id="genome-collector">
+  <p align="center">
+<img alt="Genome Collector Logo" title="DNA Chisel" src="https://raw.githubusercontent.com/Edinburgh-Genome-Foundry/genome_collector/master/docs/_static/images/title.png" width="450">
+<br /><br />
+</p><div class="section" id="genome-collector">
 <h1>Genome Collector<a class="headerlink" href="#genome-collector" title="Permalink to this headline">¶</a></h1>
 <a class="reference external image-reference" href="https://travis-ci.org/Edinburgh-Genome-Foundry/genome_collector"><img alt="Travis CI build status" src="https://travis-ci.org/Edinburgh-Genome-Foundry/genome_collector.svg?branch=master" /></a>
 <a class="reference external image-reference" href="https://coveralls.io/github/Edinburgh-Genome-Foundry/genome_collector?branch=master"><img alt="https://coveralls.io/repos/github/Edinburgh-Genome-Foundry/genome_collector/badge.svg?branch=master" src="https://coveralls.io/repos/github/Edinburgh-Genome-Foundry/genome_collector/badge.svg?branch=master" /></a>
@@ -114,35 +117,33 @@
 <a class="reference external" href="https://edinburgh-genome-foundry.github.io/genome_collector/">here</a>)
 is a Python library to download and manage reference genome data for specific
 TaxIDs, in particular nucleotide and protein sequences (in fasta/genbank/gff
-formats), and BLAST databases (nucl/prot).</p>
+formats), and alignment databases (BLAST, Bowtie1/2).</p>
 <p>The data is downloaded automatically on a need-to basis, making it very easy
 for Python projects to use and re-use reference genomes of E. coli,
 S. cerevisiae, and so on, without the worry of manually downloading from NCBI.</p>
-<div class="section" id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
-<p>Let’s get a local path to an E. coli BLAST database:</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Let’s get Biopython records of all protein sequences in <em>E. coli</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">genome_collector</span> <span class="kn">import</span> <span class="n">GenomeCollection</span>
 <span class="n">collection</span> <span class="o">=</span> <span class="n">GenomeCollection</span><span class="p">()</span>
-<span class="n">db_path</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">get_taxid_blastdb_path</span><span class="p">(</span><span class="n">taxid</span><span class="o">=</span><span class="mi">511145</span><span class="p">,</span> <span class="n">db_type</span><span class="o">=</span><span class="s1">&#39;nucl&#39;</span><span class="p">)</span>
+<span class="n">records</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">get_taxid_biopython_records</span><span class="p">(</span><span class="mi">511145</span><span class="p">,</span> <span class="s2">&quot;protein_fasta&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The returned <code class="docutils literal notranslate"><span class="pre">db_path</span></code> is a path to a local nucleotide BLAST database for
-E. coli. If there was no E. coli database on your machine, Genome Collector
-downloaded the genome data and built the BLAST database to make sure that
-the returned path actually points to a database (this is a one-off download
-which won’t happen again as long as the files stay there).</p>
-<p>You can now use the <code class="docutils literal notranslate"><span class="pre">db_path</span></code> to start a BLAST process:</p>
+<p>And that’s it! If the protein data wasn’t already on your machine, Genome
+Collector downloaded from NCBI, and stored in your “collection” for the next
+time time you need it.</p>
+<p>Now let’s get a path to a local BLAST database for <em>S. cerevisiae</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">genome_collector</span> <span class="kn">import</span> <span class="n">GenomeCollection</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="n">GenomeCollection</span><span class="p">()</span>
+<span class="n">db_path</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">get_taxid_blastdb_path</span><span class="p">(</span><span class="n">taxid</span><span class="o">=</span><span class="mi">559292</span><span class="p">,</span> <span class="n">db_type</span><span class="o">=</span><span class="s1">&#39;nucl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If there was no <em>S. cerevisiae</em> database on your machine, Genome Collector
+downloaded the genome data and built it. It is now in your collection, and you
+can use the returned <code class="docutils literal notranslate"><span class="pre">db_path</span></code> to start a BLAST process:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
     <span class="s1">&#39;blastn&#39;</span><span class="p">,</span> <span class="s1">&#39;-db&#39;</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="s1">&#39;-query&#39;</span><span class="p">,</span> <span class="s1">&#39;queries.fa&#39;</span><span class="p">,</span> <span class="s1">&#39;-out&#39;</span><span class="p">,</span> <span class="s1">&#39;results.txt&#39;</span>
-<span class="p">])</span>
-</pre></div>
-</div>
-<p>For convenience you can also BLAST in a single command, which will automatically
-create the path to the database, and create the BLAST database from scratch
-if it doesn’t exist:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">collection</span><span class="o">.</span><span class="n">blast_against_taxid</span><span class="p">(</span><span class="s1">&#39;511145&#39;</span><span class="p">,</span> <span class="s1">&#39;nucl&#39;</span><span class="p">,</span> <span class="p">[</span>
-    <span class="s1">&#39;blastn&#39;</span><span class="p">,</span> <span class="s1">&#39;-query&#39;</span><span class="p">,</span> <span class="s1">&#39;blast_test.fa&#39;</span><span class="p">,</span> <span class="s2">&quot;-out&quot;</span><span class="p">,</span> <span class="s1">&#39;result.txt&#39;</span>
 <span class="p">])</span>
 </pre></div>
 </div>
@@ -200,6 +201,16 @@ data folder. This can be changed by adding a data_dir at the end:</p>
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="similar-projects">
+<h2>Similar projects<a class="headerlink" href="#similar-projects" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/kblin/ncbi-genome-download">ncbi-genome-download</a>
+and <a class="reference external" href="https://github.com/simonvh/genomepy">Genomepy</a> are previous projects with
+a similar goal. In comparison, Genome Collector is more opinionated, it uses
+TaxID first, and is meant for use in Python scripts/Jupyter
+notebooks (while the other tools are primarily for command-line usage), with
+practical features like Biopython records loading and “on-demand”
+genome downloading and database building.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
