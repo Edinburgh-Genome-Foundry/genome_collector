@@ -158,6 +158,101 @@ for no logging, or any Proglog logger.</p>
 </tbody>
 </table>
 <dl class="method">
+<dt id="genome_collector.GenomeCollection.blast_against_taxid">
+<code class="sig-name descname">blast_against_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">db_type</em>, <em class="sig-param">blast_args</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.blast_against_taxid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a BLAST, using a genome_collector database.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>taxid</strong></p>
+<blockquote>
+<div><p>TaxID (int or str) of the reference genome against which the query
+will be blaster. If no database for this taxID is available locally
+it will be downloaded.</p>
+</div></blockquote>
+<p><strong>db_type</strong></p>
+<blockquote>
+<div><p>Either “nucl” (nucleotides database for blastn, blastx) or “prot”
+(protein database, untested).</p>
+</div></blockquote>
+<p><strong>blast_args</strong></p>
+<blockquote>
+<div><p>List of NCBI-BLAST arguments, for instance [‘blastn’, ‘-query’,
+‘my_sequences.fa’, ‘-out’, ‘myresults.xml’].</p>
+</div></blockquote>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">blast_against_taxid</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">db_type</span><span class="p">,</span> <span class="n">blast_args</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.datafile_path">
+<code class="sig-name descname">datafile_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.datafile_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a standardized datafile path for the given TaxID.</p>
+<p>Unlike get methods such as <code class="docutils literal notranslate"><span class="pre">self.get_taxid_genome_data_path()</span></code>, this
+method only returns the path, and does not check whether the files
+exist locally or not.</p>
+<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genomic_fasta, protein_fasta,
+blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.download_taxid_genome_data_from_ncbi">
+<code class="sig-name descname">download_taxid_genome_data_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_data_from_ncbi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download and uncompress a gz file from archives.</p>
+<p>data_type is either genomic_fasta, genomic_genbank, genomic_gff,
+or protein_fasta.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi">
+<code class="sig-name descname">download_taxid_genome_infos_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download infos on the TaxID and store them in ‘[taxid].json’.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.generate_blast_db_for_taxid">
+<code class="sig-name descname">generate_blast_db_for_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">db_type='nucl'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.generate_blast_db_for_taxid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a Blast DB for the TaxID. Autodownload FASTA if needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">db_type</span></code> is either “nucl” (nucleotides database for blastn, blastx)
+or “prot” (protein database, untested).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.generate_bowtie_index_for_taxid">
+<code class="sig-name descname">generate_bowtie_index_for_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">version='2'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.generate_bowtie_index_for_taxid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a Bowtie (1 or 2) index for the given TaxID.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.get_taxid_biopython_records">
+<code class="sig-name descname">get_taxid_biopython_records</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">source_type='genomic_genbank'</em>, <em class="sig-param">as_iterator=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_biopython_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_biopython_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of biopython records for the genome’s chromosome.</p>
+<p>Even if there is a single record (for genomes with a single chromosome,
+a list is returned.</p>
+<p>For huge genomes, use the <code class="docutils literal notranslate"><span class="pre">as_iterator</span></code> option to return a Python
+iterator, which avoids to load all chromosomes at once in memory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.get_taxid_blastdb_path">
+<code class="sig-name descname">get_taxid_blastdb_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">db_type</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_blastdb_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the path to a local blast DB, download and create one if needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">db_type</span></code> is either “nucl” (nucleotides database for blastn, blastx)
+or “prot” (protein database, untested).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.get_taxid_bowtie_index_path">
+<code class="sig-name descname">get_taxid_bowtie_index_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">version='2'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_bowtie_index_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a path to the Bowtie (1 or 2) index for the given TaxID.</p>
+<p>This will download data and generate the index if necessary.
+This requires Bowtie (1 or 2) installed.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="genome_collector.GenomeCollection.get_taxid_genome_data_path">
 <code class="sig-name descname">get_taxid_genome_data_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">data_type='genomic_fasta'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/genome_collector/GenomeCollection.html#GenomeCollection.get_taxid_genome_data_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_genome_data_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a path to the taxid’s genome sequence. Download if needed.</p>
@@ -178,6 +273,41 @@ or protein_fasta</p>
 <span class="gp">&gt;&gt;&gt; </span>     <span class="s1">&#39;AssemblyID&#39;</span><span class="p">:</span> <span class="s1">&#39;1755381&#39;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>     <span class="o">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.list_locally_available_taxids">
+<code class="sig-name descname">list_locally_available_taxids</code><span class="sig-paren">(</span><em class="sig-param">data_type='infos'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.list_locally_available_taxids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all taxIDs for which there is a local data file of this type.</p>
+<p>Parameter <code class="docutils literal notranslate"><span class="pre">data_type</span></code> should be one of genomic_fasta, protein_fasta,
+blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.list_locally_available_taxids_names">
+<code class="sig-name descname">list_locally_available_taxids_names</code><span class="sig-paren">(</span><em class="sig-param">print_mode=False</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.list_locally_available_taxids_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionnary {taxid: scientific_name} of all local taxIDs.</p>
+<p>For convenience, when print_mode is set to True, the table is printed
+in alphabetical order instead of being returned as a dict.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.remove_all_local_data_files">
+<code class="sig-name descname">remove_all_local_data_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.remove_all_local_data_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all the locally stored data files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="genome_collector.GenomeCollection.remove_all_taxid_files">
+<code class="sig-name descname">remove_all_taxid_files</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.remove_all_taxid_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all local data files for this TaxID. Return a names list.</p>
+<p class="rubric">Examples</p>
+<p>To remove all local data files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">genome_collector</span> <span class="k">as</span> <span class="nn">gd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="n">gd</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">gd</span><span class="o">.</span><span class="n">remove_all_taxid_files</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

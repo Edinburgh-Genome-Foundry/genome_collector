@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>genome_collector.mixins.FileManagerMixin</title>
+    
+      <link rel="stylesheet" href="../../../_static/pygments.css">
+      <link rel="stylesheet" href="../../../_static/theme.css">
+      <link rel="stylesheet" href="../../../_static/sphinx_press_theme.css">
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+      
+      <script src="../../../_static/theme-vendors.js"></script>
+      <script src="../../../_static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../../../genindex.html" />
+  <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../../../index.html" class="home-link">
+    
+      <span class="site-name">Genome Collector</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../../../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../../../index.html#more-biology-software">Reference</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../../../ref.html" class="reference internal ">Genome Collector API Reference</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+    
+      <li><a href="../../index.html">Module code</a> &raquo;</li>
+    
+    <li>genome_collector.mixins.FileManagerMixin</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <h1>Source code for genome_collector.mixins.FileManagerMixin</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Mixin with everything related to file creation/deletion/listing...&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">appdirs</span>
+
+<span class="n">LOCAL_DIR</span> <span class="o">=</span> <span class="n">appdirs</span><span class="o">.</span><span class="n">user_data_dir</span><span class="p">(</span><span class="n">appname</span><span class="o">=</span><span class="s2">&quot;genome_collector&quot;</span><span class="p">,</span> <span class="n">appauthor</span><span class="o">=</span><span class="s2">&quot;EGF&quot;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">FileManagerMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;All methods are directly accessible to GenomeCollection instances.&quot;&quot;&quot;</span>
+
+    <span class="n">datafiles_extensions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;genomic_fasta&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.fa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_genbank&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_gff&quot;</span><span class="p">:</span> <span class="s2">&quot;_gff.gb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protein_fasta&quot;</span><span class="p">:</span> <span class="s2">&quot;_protein.fa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;blast_nucl&quot;</span><span class="p">:</span> <span class="s2">&quot;_nucl&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;blast_prot&quot;</span><span class="p">:</span> <span class="s2">&quot;_prot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_fasta_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.fna.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_genbank_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.gbff.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;genomic_gff_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_genomic.gff.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protein_fasta_gz&quot;</span><span class="p">:</span> <span class="s2">&quot;_protein.faa.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;infos&quot;</span><span class="p">:</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bowtie1_index&quot;</span><span class="p">:</span> <span class="s2">&quot;_bowtie1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bowtie2_index&quot;</span><span class="p">:</span> <span class="s2">&quot;_bowtie2&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">autodownload</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">default_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GENOME_COLLECTOR_DATA_DIR&quot;</span><span class="p">,</span> <span class="n">LOCAL_DIR</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">datafile_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a standardized datafile path for the given TaxID.</span>
+<span class="sd">  </span>
+<span class="sd">        Unlike get methods such as ``self.get_taxid_genome_data_path()``, this</span>
+<span class="sd">        method only returns the path, and does not check whether the files</span>
+<span class="sd">        exist locally or not.</span>
+
+<span class="sd">        Parameter ``data_type`` should be one of genomic_fasta, protein_fasta,</span>
+<span class="sd">        blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">taxid</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">list_locally_available_taxids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;infos&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all taxIDs for which there is a local data file of this type.</span>
+
+<span class="sd">        Parameter ``data_type`` should be one of genomic_fasta, protein_fasta,</span>
+<span class="sd">        blast_nucl, blast_prot, genomic_gz, protein_gz, infos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span>
+        <span class="n">local_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+        <span class="n">regexpr</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(\d+)</span><span class="si">%s</span><span class="s2">(.|$)&quot;</span> <span class="o">%</span> <span class="n">extension</span>
+        <span class="n">available_taxids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">local_files</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regexpr</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">available_taxids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">available_taxids</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">list_locally_available_taxids_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a dictionnary {taxid: scientific_name} of all local taxIDs.</span>
+<span class="sd">        </span>
+<span class="sd">        For convenience, when print_mode is set to True, the table is printed</span>
+<span class="sd">        in alphabetical order instead of being returned as a dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">taxid</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_infos</span><span class="p">(</span><span class="n">taxid</span><span class="p">)[</span><span class="s2">&quot;ScientificName&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;infos&quot;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">print_mode</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">taxid</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">name</span> <span class="k">for</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">remove_all_taxid_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all local data files for this TaxID. Return a names list.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        ========</span>
+
+<span class="sd">        To remove all local data files:</span>
+
+<span class="sd">        &gt;&gt;&gt; import genome_collector as gd</span>
+<span class="sd">        &gt;&gt;&gt; for taxid in gd.list_locally_available_taxids():</span>
+<span class="sd">        &gt;&gt;&gt;     gd.remove_all_taxid_files(taxid)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">regexpr</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(\d+)&quot;</span>
+        <span class="n">removed_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">local_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">local_files</span><span class="p">:</span>
+            <span class="n">local_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regexpr</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">file_taxid</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">file_taxid</span> <span class="o">==</span> <span class="n">taxid</span><span class="p">:</span>
+                <span class="n">removed_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">removed_files</span>
+
+    <span class="k">def</span> <span class="nf">remove_all_local_data_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all the locally stored data files&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">taxid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_locally_available_taxids</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_all_taxid_files</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2019, Edinburgh Genome Foundry.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>

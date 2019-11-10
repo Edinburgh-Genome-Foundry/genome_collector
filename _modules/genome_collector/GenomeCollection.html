@@ -224,16 +224,24 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">path</span></div>
 
-    <span class="k">def</span> <span class="nf">get_taxid_biopython_records</span><span class="p">(</span>
+<div class="viewcode-block" id="GenomeCollection.get_taxid_biopython_records"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.get_taxid_biopython_records">[docs]</a>    <span class="k">def</span> <span class="nf">get_taxid_biopython_records</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;genomic_genbank&quot;</span><span class="p">,</span> <span class="n">as_iterator</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of biopython records for the genome&#39;s chromosome.</span>
+<span class="sd">        </span>
+<span class="sd">        Even if there is a single record (for genomes with a single chromosome,</span>
+<span class="sd">        a list is returned.</span>
+
+<span class="sd">        For huge genomes, use the ``as_iterator`` option to return a Python</span>
+<span class="sd">        iterator, which avoids to load all chromosomes at once in memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_genome_data_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">source_type</span><span class="p">)</span>
         <span class="n">data_format</span> <span class="o">=</span> <span class="n">source_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">records</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">as_iterator</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">records</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">records</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">records</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

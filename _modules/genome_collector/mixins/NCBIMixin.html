@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>genome_collector.mixins.NCBIMixin</title>
+    
+      <link rel="stylesheet" href="../../../_static/pygments.css">
+      <link rel="stylesheet" href="../../../_static/theme.css">
+      <link rel="stylesheet" href="../../../_static/sphinx_press_theme.css">
+      
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+
+      <!-- sphinx script_files -->
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+      
+      <script src="../../../_static/theme-vendors.js"></script>
+      <script src="../../../_static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="../../../genindex.html" />
+  <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+
+  <body>
+    <div id="app" class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="../../../index.html" class="home-link">
+    
+      <span class="site-name">Genome Collector</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="../../../search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="../../../index.html#more-biology-software">Reference</a></span>
+      </p>
+      <ul class="">
+        
+          <li class="toctree-l1 "><a href="../../../ref.html" class="reference internal ">Genome Collector API Reference</a>
+
+            
+          </li>
+
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+    
+      <li><a href="../../index.html">Module code</a> &raquo;</li>
+    
+    <li>genome_collector.mixins.NCBIMixin</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main">
+            
+  <h1>Source code for genome_collector.mixins.NCBIMixin</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Mixin for Bowtie methods, inherited by GenomeCollection.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">urlretrieve</span>
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">Entrez</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">class</span> <span class="nc">NCBIMixin</span><span class="p">:</span>
+
+    <span class="n">use_ncbi_ftp_via_https</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">time_between_entrez_requests</span> <span class="o">=</span> <span class="mf">0.34</span>
+
+    <span class="k">def</span> <span class="nf">_wait_before_next_entrez_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">last_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_of_last_entrez_call</span>
+        <span class="k">if</span> <span class="n">last_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_time</span>
+            <span class="n">sleep_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_between_entrez_requests</span> <span class="o">-</span> <span class="n">elapsed</span>
+            <span class="k">if</span> <span class="n">sleep_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_of_last_entrez_call</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_autoset_entrez_email_if_none</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used in functions using Entrez to autoset the Entrez email (required</span>
+<span class="sd">        to do Entrez requests)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">email</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">random_id</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+            <span class="n">Entrez</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;genome_collector_</span><span class="si">%s</span><span class="s2">@replaceme.org&quot;</span> <span class="o">%</span> <span class="n">random_id</span>
+    
+    <span class="k">def</span> <span class="nf">_get_taxid_genome_id_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a Genome ID for this TaxID, provided by the NCBI API.&quot;&quot;&quot;</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_autoset_entrez_email_if_none</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esearch</span><span class="p">(</span>
+            <span class="n">term</span><span class="o">=</span><span class="s2">&quot;txid&quot;</span> <span class="o">+</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;genome&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span>
+        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;IdList&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                <span class="s2">&quot;Found </span><span class="si">%d</span><span class="s2"> results (instead of 1) for taxID </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">),</span> <span class="n">taxid</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">download_taxid_genome_infos_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Download infos on the TaxID and store them in &#39;[taxid].json&#39;.&quot;&quot;&quot;</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_autoset_entrez_email_if_none</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Downloading infos for taxid </span><span class="si">%s</span><span class="s2"> from NCBI&quot;</span> <span class="o">%</span> <span class="n">taxid</span><span class="p">)</span>
+
+        <span class="c1"># First get the corresponding genome ID, check that there is only one</span>
+        <span class="n">genome_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_taxid_genome_id_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+
+        <span class="c1"># Then search for the reference genome, check that there is only one</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esummary</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">genome_id</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;genome&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                <span class="s2">&quot;Found </span><span class="si">%d</span><span class="s2"> results (instead of 1) for genome </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="n">genome_id</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">infos</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># So far so good, valid TaxID! Let us get more infos about that taxID</span>
+        <span class="c1"># such as the scientific name, division, etc.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esummary</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">taxid</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;taxonomy&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+        <span class="n">infos</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">infos</span><span class="p">[</span><span class="s2">&quot;taxID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">taxid</span>
+        <span class="n">infos</span><span class="p">[</span><span class="s2">&quot;genomeID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genome_id</span>
+
+        <span class="c1"># Finally, write the infos locally</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;infos&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">infos</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_taxid_assembly_url_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a URL pointing to this taxid&#39;s genome sequence in NCBI.</span>
+<span class="sd">        </span>
+<span class="sd">        data_type can be either genomic_fasta, protein_fasta, genomic_genbank,</span>
+<span class="sd">        genomic_gff</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_autoset_entrez_email_if_none</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span>
+            <span class="s2">&quot;Getting assembly URL for taxid </span><span class="si">%s</span><span class="s2"> from NCBI&quot;</span> <span class="o">%</span> <span class="n">taxid</span>
+        <span class="p">)</span>
+        <span class="n">genome_infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_taxid_infos</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_before_next_entrez_request</span><span class="p">()</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">esummary</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">genome_infos</span><span class="p">[</span><span class="s2">&quot;AssemblyID&quot;</span><span class="p">],</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;assembly&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span>
+        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+        <span class="n">ftp_path</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;DocumentSummarySet&quot;</span><span class="p">][</span><span class="s2">&quot;DocumentSummary&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span>
+            <span class="s2">&quot;FtpPath_RefSeq&quot;</span>
+        <span class="p">]</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="n">ftp_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_ncbi_ftp_via_https</span><span class="p">:</span>
+            <span class="n">ftp_path</span> <span class="o">=</span> <span class="n">ftp_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;ftp:&quot;</span><span class="p">,</span> <span class="s2">&quot;https:&quot;</span><span class="p">)</span>
+        <span class="n">extension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafiles_extensions</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_gz&quot;</span> <span class="o">%</span> <span class="n">data_type</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ftp_path</span><span class="p">,</span> <span class="n">basename</span> <span class="o">+</span> <span class="n">extension</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">download_taxid_genome_data_from_ncbi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Download and uncompress a gz file from archives.</span>
+<span class="sd">        </span>
+<span class="sd">        data_type is either genomic_fasta, genomic_genbank, genomic_gff,</span>
+<span class="sd">        or protein_fasta.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;TaxID </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">taxid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Getting NCBI URL for </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+        <span class="n">taxid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">taxid</span><span class="p">)</span>
+        <span class="n">ftp_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_taxid_assembly_url_from_ncbi</span><span class="p">(</span>
+            <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span>
+        <span class="p">)</span>
+        <span class="n">target_gz_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_gz&quot;</span> <span class="o">%</span> <span class="n">data_type</span><span class="p">)</span>
+        <span class="n">target_data_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datafile_path</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Downloading </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+        <span class="n">urlretrieve</span><span class="p">(</span><span class="n">ftp_url</span><span class="p">,</span> <span class="n">target_gz_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Unzipping  </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_data_file</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_fasta</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">target_gz_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_gz</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_gz</span><span class="p">,</span> <span class="n">f_fasta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_message</span><span class="p">(</span><span class="s2">&quot;Done downloading </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2019, Edinburgh Genome Foundry.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a>.
+</div>
+            </div>
+          </div>
+      </page>
+    </div>
+    
+    
+  </body>
+</html>
