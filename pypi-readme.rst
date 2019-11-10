@@ -63,10 +63,7 @@ Infos
 
 - **Licence:** MIT
 
-- **Similar software:** see pre-existing projects `ncbi-genome-download <https://github.com/kblin/ncbi-genome-download>`_
-and `Genomepy <https://github.com/simonvh/genomepy>`_ . In comparison, Genome
-Collector is more opinionated, it uses TaxID first and has features like
-on-demand genome downloading and database building, and Biopython records loading.
+- **Similar software:** see pre-existing projects `ncbi-genome-download <https://github.com/kblin/ncbi-genome-download>`_ and `Genomepy <https://github.com/simonvh/genomepy>`_ . In comparison, Genome Collector is more opinionated, it uses TaxID first and has features like on-demand genome downloading and database building, and Biopython records loading.
 
 
 Everyone is welcome to contribute !
