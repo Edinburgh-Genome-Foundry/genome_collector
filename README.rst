@@ -1,5 +1,13 @@
+.. raw:: html
+
+    <p align="center">
+    <img alt="Genome Collector Logo" title="DNA Chisel" src="https://raw.githubusercontent.com/Edinburgh-Genome-Foundry/genome_collector/master/docs/_static/images/title.png" width="450">
+    <br /><br />
+    </p>
+
 Genome Collector
 ================
+
 .. image:: https://travis-ci.org/Edinburgh-Genome-Foundry/genome_collector.svg?branch=master
    :target: https://travis-ci.org/Edinburgh-Genome-Foundry/genome_collector
    :alt: Travis CI build status
@@ -12,30 +20,38 @@ Genome Collector (full documentation
 `here <https://edinburgh-genome-foundry.github.io/genome_collector/>`_)
 is a Python library to download and manage reference genome data for specific
 TaxIDs, in particular nucleotide and protein sequences (in fasta/genbank/gff
-formats), and BLAST databases (nucl/prot).
+formats), and alignment databases (BLAST, Bowtie1/2).
 
 The data is downloaded automatically on a need-to basis, making it very easy
 for Python projects to use and re-use reference genomes of E. coli,
 S. cerevisiae, and so on, without the worry of manually downloading from NCBI.
 
-Example
--------
+Examples
+--------
 
-Let's get a local path to an E. coli BLAST database:
+Let's get Biopython records of all protein sequences in *E. coli*:
 
 .. code:: python
 
     from genome_collector import GenomeCollection
     collection = GenomeCollection()
-    db_path = collection.get_taxid_blastdb_path(taxid=511145, db_type='nucl')
+    records = collection.get_taxid_biopython_records(511145, "protein_fasta")
 
-The returned ``db_path`` is a path to a local nucleotide BLAST database for
-E. coli. If there was no E. coli database on your machine, Genome Collector
-downloaded the genome data and built the BLAST database to make sure that
-the returned path actually points to a database (this is a one-off download
-which won't happen again as long as the files stay there).
+And that's it! If the protein data wasn't already on your machine, Genome
+Collector downloaded from NCBI, and stored in your "collection" for the next
+time time you need it.
 
-You can now use the ``db_path`` to start a BLAST process:
+Now let's get a path to a local BLAST database for *S. cerevisiae*:
+
+.. code:: python
+
+    from genome_collector import GenomeCollection
+    collection = GenomeCollection()
+    db_path = collection.get_taxid_blastdb_path(taxid=559292, db_type='nucl')
+
+If there was no *S. cerevisiae* database on your machine, Genome Collector
+downloaded the genome data and built it. It is now in your collection, and you
+can use the returned ``db_path`` to start a BLAST process:
 
 .. code:: python
 
@@ -43,18 +59,6 @@ You can now use the ``db_path`` to start a BLAST process:
     process = subprocess.run([
         'blastn', '-db', db_path, '-query', 'queries.fa', '-out', 'results.txt'
     ])
-
-
-For convenience you can also BLAST in a single command, which will automatically
-create the path to the database, and create the BLAST database from scratch
-if it doesn't exist:
-
-.. code:: python
-
-    collection.blast_against_taxid('511145', 'nucl', [
-        'blastn', '-query', 'blast_test.fa', "-out", 'result.txt'
-    ])
-
 
 Usage tips
 ----------
@@ -123,6 +127,18 @@ data folder. This can be changed by adding a data_dir at the end:
 .. code::
 
     python -m genome_collector genome 511145 /path/to/some/dir/
+
+
+Similar projects
+----------------
+
+`ncbi-genome-download <https://github.com/kblin/ncbi-genome-download>`_
+and `Genomepy <https://github.com/simonvh/genomepy>`_ are previous projects with
+a similar goal. In comparison, Genome Collector is more opinionated, it uses
+TaxID first, and is meant for use in Python scripts/Jupyter
+notebooks (while the other tools are primarily for command-line usage), with
+practical features like Biopython records loading and "on-demand"
+genome downloading and database building.
 
 Installation
 -------------

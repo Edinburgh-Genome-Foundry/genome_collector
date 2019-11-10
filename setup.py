@@ -11,7 +11,7 @@ setup(
     author='Zulko',
     url='https://github.com/Edinburgh-Genome-Foundry/genome_collector',
     description='Easily download and store genomes and BLAST DBs from NCBI',
-    long_description=open('README.rst').read(),
+    long_description=open('pypi-readme.rst').read(),
     license='MIT',
     keywords="NCBI genomes TaxID BLAST",
     packages=find_packages(exclude='docs'),

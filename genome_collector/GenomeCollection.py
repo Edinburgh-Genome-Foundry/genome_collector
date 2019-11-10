@@ -2,11 +2,13 @@ import os
 import json
 
 import proglog
+from Bio import SeqIO
 
 from .mixins.BlastMixin import BlastMixin
 from .mixins.NCBIMixin import NCBIMixin
 from .mixins.FileManagerMixin import FileManagerMixin
 from .mixins.BowtieMixin import BowtieMixin
+
 
 class GenomeCollection(BlastMixin, NCBIMixin, FileManagerMixin, BowtieMixin):
     """Collection of local data files including genomes and BLAST databases.
@@ -58,12 +60,10 @@ class GenomeCollection(BlastMixin, NCBIMixin, FileManagerMixin, BowtieMixin):
         self.data_dir = data_dir
         self._logger = proglog.default_bar_logger(logger)
         self._time_of_last_entrez_call = None
-    
+
     def _log_message(self, message):
         """Send a message (with prefix) to the logger)"""
         self._logger(message=self.messages_prefix + message)
-
-    
 
     def get_taxid_infos(self, taxid):
         """Return a dict with data about the taxid.
@@ -117,3 +117,14 @@ class GenomeCollection(BlastMixin, NCBIMixin, FileManagerMixin, BowtieMixin):
                 taxid, data_type=data_type
             )
         return path
+
+    def get_taxid_biopython_records(
+        self, taxid, source_type="genomic_genbank", as_iterator=False
+    ):
+        path = self.get_taxid_genome_data_path(taxid, data_type=source_type)
+        data_format = source_type.split("_")[1]
+        records = SeqIO.parse(path, data_format)
+        if as_iterator:
+            return records
+        else:
+            return list(records)

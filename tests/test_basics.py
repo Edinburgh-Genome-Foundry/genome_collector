@@ -153,3 +153,15 @@ def test_command_line_blast_db(tmpdir):
         ]
     )
     assert len(os.listdir(data_dir)) == 6
+
+
+def test_get_biopython_records(tmpdir):
+    collection = GenomeCollection(data_dir=str(tmpdir))
+    records = collection.get_taxid_biopython_records(PHAGE_TAXID)
+    assert len(records) == 1
+    assert 168000 < len(records[0]) < 170000
+
+def test_get_bowtie_index(tmpdir):
+    collection = GenomeCollection(data_dir=str(tmpdir))
+    path = collection.get_taxid_bowtie_index_path(PHAGE_TAXID, version="2")
+    assert os.path.exists(path + '.1.bt2')
