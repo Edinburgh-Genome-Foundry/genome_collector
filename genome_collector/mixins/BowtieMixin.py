@@ -15,7 +15,8 @@ class BowtieMixin:
         db_path = self.datafile_path(
             taxid=taxid, data_type="bowtie%s_index" % version
         )
-        bowtie_args = ["bowtie%s-build" % version, fa_path, db_path]
+        executable = "bowtie%s-build" % ("" if version == "1" else "2")
+        bowtie_args = [executable, fa_path, db_path]
 
         self._log_message(
             "Generating Bowtie%s index for taxid %s" % (version, taxid)
