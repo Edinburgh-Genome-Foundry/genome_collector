@@ -1,7 +1,7 @@
 .. raw:: html
 
     <p align="center">
-    <img alt="Genome Collector Logo" title="DNA Chisel" src="https://raw.githubusercontent.com/Edinburgh-Genome-Foundry/genome_collector/master/docs/_static/images/title.png" width="450">
+    <img alt="Genome Collector Logo" title="DNA Chisel" src="https://raw.githubusercontent.com/Edinburgh-Genome-Foundry/genome_collector/master/docs/_static/images/title.png" width="600">
     <br /><br />
     </p>
 
