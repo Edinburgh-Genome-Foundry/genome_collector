@@ -6,7 +6,7 @@ import os
 class BowtieMixin:
     """All methods are directly accessible to GenomeCollection instances."""
 
-    def generate_bowtie_index_for_taxid(self, taxid, version="2"):
+    def generate_bowtie_index_for_taxid(self, taxid, version="1"):
         """Generate a Bowtie (1 or 2) index for the given TaxID."""
         taxid = str(taxid)
         fa_path = self.get_taxid_genome_data_path(
@@ -31,7 +31,7 @@ class BowtieMixin:
             "Done generating Bowtie%s index for taxid %s" % (version, taxid)
         )
 
-    def get_taxid_bowtie_index_path(self, taxid, version="2"):
+    def get_taxid_bowtie_index_path(self, taxid, version="1"):
         """Get a path to the Bowtie (1 or 2) index for the given TaxID.
         
         This will download data and generate the index if necessary.
