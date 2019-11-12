@@ -3,6 +3,7 @@
 import subprocess
 import os
 
+
 class BlastMixin:
     """All methods are directly accessible to GenomeCollection instances."""
 
@@ -25,19 +26,10 @@ class BlastMixin:
             "-out",
             db_path,
         ]
-        self._log_message(
-            "Generating %s BLAST DB for taxid %s" % (db_type, taxid)
-        )
-        pipe = subprocess.PIPE
-        process = subprocess.run(blast_args, stdout=pipe, stderr=pipe)
-        if process.returncode:
-            error_message = (
-                "%s BLAST DB generation for TaxID %s failed with error: %s"
-            ) % (db_type, taxid, process.stderr)
-            raise OSError(error_message)
-        self._log_message(
-            "Done generating %s BLAST DB for taxid %s" % (db_type, taxid)
-        )
+        message = "Generating %s BLAST DB for taxid %s" % (db_type, taxid)
+        self._log_message(message)
+        self.run_process(message, blast_args)
+        self._log_message(message + " - Done!")
 
     def get_taxid_blastdb_path(self, taxid, db_type):
         """Get the path to a local blast DB, download and create one if needed.
@@ -80,11 +72,5 @@ class BlastMixin:
         taxid = str(taxid)
         db_path = self.get_taxid_blastdb_path(taxid=taxid, db_type=db_type)
         blast_args = list(blast_args) + ["-db", db_path]
-        pipe = subprocess.PIPE
-        process = subprocess.run(blast_args, stdout=pipe, stderr=pipe)
-        if process.returncode:
-            error_message = (
-                "BLASTing against TaxID %s failed with error: %s"
-            ) % (taxid, process.stderr)
-            raise IOError(error_message)
-        return process.stdout
+        name = "BLASTing against TaxID %s %s: " % (taxid, db_type)
+        return self.run_process(name, blast_args)

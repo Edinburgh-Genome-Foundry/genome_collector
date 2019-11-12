@@ -38,8 +38,8 @@ Let's get Biopython records of all protein sequences in *E. coli*:
     records = collection.get_taxid_biopython_records(511145, "protein_fasta")
 
 And that's it! If the protein data wasn't already on your machine, Genome
-Collector downloaded from NCBI, and stored in your "collection" for the next
-time time you need it.
+Collector downloaded it from NCBI, and stored it in your "collection" for the
+next time you need it.
 
 Now let's get a path to a local BLAST database for *S. cerevisiae*:
 
@@ -50,8 +50,9 @@ Now let's get a path to a local BLAST database for *S. cerevisiae*:
     db_path = collection.get_taxid_blastdb_path(taxid=559292, db_type='nucl')
 
 If there was no *S. cerevisiae* database on your machine, Genome Collector
-downloaded the genome data and built it. It is now in your collection, and you
-can use the returned ``db_path`` to start a BLAST process:
+downloaded the genome data and built the database. It is now in your collection,
+and the returned path ``db_path`` is pointing to it. So you can use it to run
+a BLAST process:
 
 .. code:: python
 
@@ -92,7 +93,23 @@ shared by different Python processes):
 
     env GENOME_COLLECTOR_DATA_DIR = /my/other/path
 
+TaxIDs with more than one genome assembly
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Even when TaxIDs correspond to a well-identified strain or species, they may
+have more than one genome assembly available on NCBI. For instance, the Lambda
+Phage with taxID 10710 has
+`2 assemblies available <https://www.ncbi.nlm.nih.gov/genome/genomes/4416?>`_.
+
+In this case, most autodownload functions will fail, and you should dowload
+explicitly the genome assembly informationat the beginning of your script,
+by providing the an assembly ID in ``download_taxid_genome_infos_from_ncbi``:
+
+.. code:: python
+
+    collection.download_taxid_genome_infos_from_ncbi(taxid, assembly_id="456094")
+    # Or to download whichever assembly comes first in the NCBI list:
+    collection.download_taxid_genome_infos_from_ncbi(taxid, assembly_id="#1")
 
 Preventing auto-download
 ~~~~~~~~~~~~~~~~~~~~~~~~

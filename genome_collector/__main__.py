@@ -3,6 +3,7 @@
 Usage:
   python -m genome_collector data <taxid> <data_type> [data_dir]
   python -m genome_collector blast_db <taxid> <db_type> [data_dir]
+  python -m genome_collector bowtie1 <taxid> [data_dir]
 
 Parameters:
   - taxid: a taxonomic ID. Must have a single reference assembly on NCBI.
@@ -32,5 +33,12 @@ if __name__ == "__main__":
             collection.data_dir = sys.argv[4]
         taxid, db_type = sys.argv[2], sys.argv[3]
         collection.generate_blast_db_for_taxid(taxid, db_type=db_type)
+    elif command in ["bowtie1", "bowtie2"]:
+        collection = GenomeCollection()
+        if len(sys.argv) == 4:
+            collection.data_dir = sys.argv[3]
+        taxid = sys.argv[2]
+        version = "1" if command == "bowtie1" else "2"
+        collection.generate_bowtie_index_for_taxid(taxid, version=version)
     else:
         raise ValueError("Unknown genome_collector command %s." % command)

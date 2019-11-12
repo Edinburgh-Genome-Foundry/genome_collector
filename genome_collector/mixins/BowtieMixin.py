@@ -1,7 +1,8 @@
-"""Mixin for Bowtie methods, inherited by GenomeCollection.""" 
+"""Mixin for Bowtie methods, inherited by GenomeCollection."""
 
 import subprocess
 import os
+
 
 class BowtieMixin:
     """All methods are directly accessible to GenomeCollection instances."""
@@ -9,6 +10,7 @@ class BowtieMixin:
     def generate_bowtie_index_for_taxid(self, taxid, version="1"):
         """Generate a Bowtie (1 or 2) index for the given TaxID."""
         taxid = str(taxid)
+        version = str(version)
         fa_path = self.get_taxid_genome_data_path(
             taxid, data_type="genomic_fasta"
         )
@@ -18,19 +20,10 @@ class BowtieMixin:
         executable = "bowtie%s-build" % ("" if version == "1" else "2")
         bowtie_args = [executable, fa_path, db_path]
 
-        self._log_message(
-            "Generating Bowtie%s index for taxid %s" % (version, taxid)
-        )
-        pipe = subprocess.PIPE
-        process = subprocess.run(bowtie_args, stdout=pipe, stderr=pipe)
-        if process.returncode:
-            error_message = (
-                "Bowtie%s index generation for TaxID %s failed with error: %s"
-            ) % (version, taxid, process.stderr)
-            raise OSError(error_message)
-        self._log_message(
-            "Done generating Bowtie%s index for taxid %s" % (version, taxid)
-        )
+        message = "Generating Bowtie%s index for taxid %s" % (version, taxid)
+        self._log_message(message)
+        self.run_process(message, bowtie_args)
+        self._log_message(message + " - Done")
 
     def get_taxid_bowtie_index_path(self, taxid, version="1"):
         """Get a path to the Bowtie (1 or 2) index for the given TaxID.

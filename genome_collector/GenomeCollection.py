@@ -1,5 +1,6 @@
 import os
 import json
+import subprocess
 
 import proglog
 from Bio import SeqIO
@@ -97,6 +98,7 @@ class GenomeCollection(BlastMixin, NCBIMixin, FileManagerMixin, BowtieMixin):
         with open(path, "r") as f:
             return json.load(f)
 
+
     def get_taxid_genome_data_path(self, taxid, data_type="genomic_fasta"):
         """Return a path to the taxid's genome sequence. Download if needed.
         
@@ -136,3 +138,16 @@ class GenomeCollection(BlastMixin, NCBIMixin, FileManagerMixin, BowtieMixin):
             return records
         else:
             return list(records)
+    
+    @staticmethod
+    def run_process(name, parameters):
+        process = subprocess.run(
+            parameters,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        if process.returncode:
+            error = process.stderr.decode()
+            parameters = " ".join(parameters)
+            raise OSError("%s failed:\n\n%s\n\n%s" % (name, error, parameters))
+        return process.stdout

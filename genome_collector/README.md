@@ -1,3 +1,20 @@
+# Code organization
+
+- **GenomeCollection.py** implements the main class. However, because this class
+  has a lot of methods, they have been separated into "mixins" to keep files
+  sizes reasonable. Each file in ``mixins/`` implements a set of of methods
+  for GenomeCollection around a different theme:
+    - **mixins/BlastMixin**: all methods to create BLAST databases and return
+      their path.
+    - **mixins/BowtieMixin**: all methods to create Bowtie indexes and return
+      their path.
+    - **mixins/NCBIMixin**: all methods to find the URLs and download infos
+      and sequences. 
+    - **mixins/FileManagerMixin**: all methods to browse the local data files,
+      and delete them if needed.
+- **__main__.py** implements the script executed when using Genome Collector
+  via the command line (``python -m genome_collector <genome>``).
+
 # How it works
 
 The main mechanism of ``genome_collector`` is that data files are always

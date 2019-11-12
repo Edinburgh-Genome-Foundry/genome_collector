@@ -10,9 +10,9 @@ setup(
     version=__version__,
     author='Zulko',
     url='https://github.com/Edinburgh-Genome-Foundry/genome_collector',
-    description='Easily download and store genomes and BLAST DBs from NCBI',
+    description='Easily download and store taxID genomes from NCBI',
     long_description=open('pypi-readme.rst').read(),
     license='MIT',
-    keywords="NCBI genomes TaxID BLAST",
+    keywords="NCBI genomes TaxID BLAST Bowtie",
     packages=find_packages(exclude='docs'),
     install_requires=['appdirs', 'Biopython', 'proglog'])
