@@ -208,8 +208,11 @@ or protein_fasta.</p>
 
 <dl class="method">
 <dt id="genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi">
-<code class="sig-name descname">download_taxid_genome_infos_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">download_taxid_genome_infos_from_ncbi</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">assembly_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.download_taxid_genome_infos_from_ncbi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download infos on the TaxID and store them in ‘[taxid].json’.</p>
+<p>For taxIDs with several genomes listed on NCBI, you can provide an
+assembly_id, which can also be of the form “#1” to select the first
+available NCBI Assembly ID (first in numerical order).</p>
 </dd></dl>
 
 <dl class="method">
@@ -222,7 +225,7 @@ or “prot” (protein database, untested).</p>
 
 <dl class="method">
 <dt id="genome_collector.GenomeCollection.generate_bowtie_index_for_taxid">
-<code class="sig-name descname">generate_bowtie_index_for_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">version='2'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.generate_bowtie_index_for_taxid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">generate_bowtie_index_for_taxid</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">version='1'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.generate_bowtie_index_for_taxid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a Bowtie (1 or 2) index for the given TaxID.</p>
 </dd></dl>
 
@@ -246,7 +249,7 @@ or “prot” (protein database, untested).</p>
 
 <dl class="method">
 <dt id="genome_collector.GenomeCollection.get_taxid_bowtie_index_path">
-<code class="sig-name descname">get_taxid_bowtie_index_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">version='2'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_bowtie_index_path" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_taxid_bowtie_index_path</code><span class="sig-paren">(</span><em class="sig-param">taxid</em>, <em class="sig-param">version='1'</em><span class="sig-paren">)</span><a class="headerlink" href="#genome_collector.GenomeCollection.get_taxid_bowtie_index_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a path to the Bowtie (1 or 2) index for the given TaxID.</p>
 <p>This will download data and generate the index if necessary.
 This requires Bowtie (1 or 2) installed.</p>

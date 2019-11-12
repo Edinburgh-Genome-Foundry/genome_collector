@@ -106,6 +106,7 @@
   <h1>Source code for genome_collector.GenomeCollection</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
 
 <span class="kn">import</span> <span class="nn">proglog</span>
 <span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">SeqIO</span>
@@ -203,6 +204,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="GenomeCollection.get_taxid_genome_data_path"><a class="viewcode-back" href="../../ref.html#genome_collector.GenomeCollection.get_taxid_genome_data_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_taxid_genome_data_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taxid</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;genomic_fasta&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a path to the taxid&#39;s genome sequence. Download if needed.</span>
 <span class="sd">        </span>
@@ -241,7 +243,20 @@
         <span class="k">if</span> <span class="n">as_iterator</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">records</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">records</span><span class="p">)</span></div></div>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">records</span><span class="p">)</span></div>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">run_process</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="p">,</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> failed:</span><span class="se">\n\n</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">parameters</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span></div>
 </pre></div>
 
           </div>

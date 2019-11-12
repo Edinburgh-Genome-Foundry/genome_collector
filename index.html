@@ -130,8 +130,8 @@ S. cerevisiae, and so on, without the worry of manually downloading from NCBI.</
 </pre></div>
 </div>
 <p>And that’s it! If the protein data wasn’t already on your machine, Genome
-Collector downloaded from NCBI, and stored in your “collection” for the next
-time time you need it.</p>
+Collector downloaded it from NCBI, and stored it in your “collection” for the
+next time you need it.</p>
 <p>Now let’s get a path to a local BLAST database for <em>S. cerevisiae</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">genome_collector</span> <span class="kn">import</span> <span class="n">GenomeCollection</span>
 <span class="n">collection</span> <span class="o">=</span> <span class="n">GenomeCollection</span><span class="p">()</span>
@@ -139,8 +139,9 @@ time time you need it.</p>
 </pre></div>
 </div>
 <p>If there was no <em>S. cerevisiae</em> database on your machine, Genome Collector
-downloaded the genome data and built it. It is now in your collection, and you
-can use the returned <code class="docutils literal notranslate"><span class="pre">db_path</span></code> to start a BLAST process:</p>
+downloaded the genome data and built the database. It is now in your collection,
+and the returned path <code class="docutils literal notranslate"><span class="pre">db_path</span></code> is pointing to it. So you can use it to run
+a BLAST process:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
     <span class="s1">&#39;blastn&#39;</span><span class="p">,</span> <span class="s1">&#39;-db&#39;</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="s1">&#39;-query&#39;</span><span class="p">,</span> <span class="s1">&#39;queries.fa&#39;</span><span class="p">,</span> <span class="s1">&#39;-out&#39;</span><span class="p">,</span> <span class="s1">&#39;results.txt&#39;</span>
@@ -172,6 +173,21 @@ script with:</p>
 <p>Finally, you can set a default path as an environment variable (so it will be
 shared by different Python processes):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">GENOME_COLLECTOR_DATA_DIR</span> <span class="o">=</span> <span class="o">/</span><span class="n">my</span><span class="o">/</span><span class="n">other</span><span class="o">/</span><span class="n">path</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="taxids-with-more-than-one-genome-assembly">
+<h3>TaxIDs with more than one genome assembly<a class="headerlink" href="#taxids-with-more-than-one-genome-assembly" title="Permalink to this headline">¶</a></h3>
+<p>Even when TaxIDs correspond to a well-identified strain or species, they may
+have more than one genome assembly available on NCBI. For instance, the Lambda
+Phage with taxID 10710 has
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/genome/genomes/4416?">2 assemblies available</a>.</p>
+<p>In this case, most autodownload functions will fail, and you should dowload
+explicitly the genome assembly informationat the beginning of your script,
+by providing the an assembly ID in <code class="docutils literal notranslate"><span class="pre">download_taxid_genome_infos_from_ncbi</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">collection</span><span class="o">.</span><span class="n">download_taxid_genome_infos_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">assembly_id</span><span class="o">=</span><span class="s2">&quot;456094&quot;</span><span class="p">)</span>
+<span class="c1"># Or to download whichever assembly comes first in the NCBI list:</span>
+<span class="n">collection</span><span class="o">.</span><span class="n">download_taxid_genome_infos_from_ncbi</span><span class="p">(</span><span class="n">taxid</span><span class="p">,</span> <span class="n">assembly_id</span><span class="o">=</span><span class="s2">&quot;#1&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
