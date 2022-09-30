@@ -37,7 +37,7 @@ class NCBIMixin:
         # Do the request
 
         search = request(**kwargs)
-        return Entrez.read(search)
+        return Entrez.read(search, validate=False)
 
     def _get_taxid_genome_id_from_ncbi(self, taxid):
         """Return a Genome ID for this TaxID, provided by the NCBI API."""
@@ -104,7 +104,7 @@ class NCBIMixin:
                         "You will need to download the infos manually using "
                         "collection.download_taxid_genome_infos_from_ncbi("
                         "taxid, assembly_id=XXX) where assembly_id can be an "
-                        "ID, or an index of the form '#1' to select the first "
+                        "ID, or an index of the form '#0' to select the first "
                         "available assembly_id."
                     )
                 raise OSError(message)
